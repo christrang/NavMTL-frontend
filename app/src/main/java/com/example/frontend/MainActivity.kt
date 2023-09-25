@@ -1,25 +1,32 @@
 package com.example.frontend
+
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.drawerlayout.widget.DrawerLayout
+import android.widget.Button
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import androidx.core.view.GravityCompat
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private val fragmentManager: FragmentManager = supportFragmentManager
     private val mapFragment = SupportMapFragment.newInstance()
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var menuButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val navView: BottomNavigationView = findViewById(R.id.nav_view)
+        drawerLayout = findViewById(R.id.drawer_layout)
+        menuButton = findViewById(R.id.menu_button)
 
         // Initialize the map
         mapFragment.getMapAsync(this)
@@ -27,13 +34,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         // Set the initial fragment to the map fragment
         replaceFragment(mapFragment)
 
-        // Handle BottomNavigationView item clicks
-        navView.setOnNavigationItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.navigation_home -> replaceFragment(mapFragment)
-                // Add more cases for other navigation items
+        // Handle menu button click to open/close the navigation menu
+        menuButton.setOnClickListener {
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START)
+            } else {
+                drawerLayout.openDrawer(GravityCompat.START)
             }
-            true
         }
     }
 
@@ -56,5 +63,20 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         )
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(montreal, 11f))
         googleMap.isTrafficEnabled = true
+    }
+
+    // Handle menu item/button clicks here
+    fun handleMenuItemClick(view: android.view.View) {
+        when (view.id) {
+            R.id.menu_item_1 -> {
+                // Handle Menu Item 1 click
+                Toast.makeText(this, "Menu Item 1 clicked", Toast.LENGTH_SHORT).show()
+            }
+            R.id.menu_item_2 -> {
+                // Handle Menu Item 2 click
+                Toast.makeText(this, "Menu Item 2 clicked", Toast.LENGTH_SHORT).show()
+            }
+            // Add more cases for other menu items/buttons as needed
+        }
     }
 }
