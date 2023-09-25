@@ -46,6 +46,8 @@ android {
 dependencies {
     val room_version = "2.5.2"
     kapt("androidx.room:room-compiler:$room_version")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
+    implementation("androidx.navigation:navigation-ui-ktx:2.3.5")
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
