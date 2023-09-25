@@ -1,6 +1,8 @@
 package com.example.frontend
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import android.widget.Button
@@ -21,9 +23,23 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var menuButton: Button
 
+
+    private lateinit var token: String // Déclarez le token ici
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Récupérer le token depuis SharedPreferences dans la méthode onCreate
+        val sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        token = sharedPrefs.getString("token", null) ?: ""
+
+        if (token.isNotEmpty()) {
+            // Utilisez le token comme vous le souhaitez dans cette activité
+            // Par exemple, vous pouvez l'afficher dans un TextView
+            Log.d("LoginActivity", "Token: $token")
+        }
+
 
         drawerLayout = findViewById(R.id.drawer_layout)
         menuButton = findViewById(R.id.menu_button)
