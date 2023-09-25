@@ -11,35 +11,38 @@ class Repository(val app: Application) {
     private val queue = Volley.newRequestQueue(app)
 
     fun login(mail: String, mdp: String, callback: (Boolean) -> Unit) {
-        val url =
-            "http://10.90.68.53/auth/token"  // Remplacez par par votre addrese ip
+        val url = "http://10.90.68.53/auth/token"  // Remplacez par par votre adresse IP
 
         val json = JSONObject()
         json.put("email", mail)
         json.put("mdp", mdp)
 
-
-
         val request = JsonObjectRequest(
             Request.Method.POST,
             url,
             json,
-            {
+            { response ->
                 // Traitement de la réponse JSON ici
 
                 // ne stocke pas de token
-                Log.d("Jeton :", it.getString("token"))
+                Log.d("Jeton :", response.getString("token"))
+
+                // Appeler le callback avec succès (true)
+                callback(true)
             },
-            {
-                // Échec de la réponse JSON, appelez le callback avec false
-                Log.d("Error.Response", it.message.toString())
+            { error ->
+                // Échec de la réponse JSON, appelez le callback avec échec (false)
+                Log.d("Error.Response", error.message.toString())
+
+                // Appeler le callback avec échec (false)
+                callback(false)
             }
         )
 
-
         queue.add(request)
     }
-                                 /// Inscription
+
+    /// Inscription
     fun inscription(
                                      nom: String,
                                      prenom: String, mail: String, mdp: String, number: String, callback: (Boolean) -> Unit) {
@@ -62,10 +65,12 @@ class Repository(val app: Application) {
 
                 // ne stocke pas de token
                 Log.d("Jeton :", it.getString("token"))
+                callback(true)
             },
             {
                 // Échec de la réponse JSON, appelez le callback avec false
                 Log.d("Error.Response", it.message.toString())
+                callback(false)
             }
         )
 

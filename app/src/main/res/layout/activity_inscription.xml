@@ -5,92 +5,170 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/inputEmail"
-        android:layout_width="291dp"
-        android:layout_height="60dp"
-        android:ems="10"
-        android:fontFamily="@font/baloo"
-        android:inputType="textEmailAddress"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.146" />
+    <ImageView
+        android:id="@+id/backgroundImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="20"
+        android:background="@drawable/inscription_backgroud"
+        android:scaleType="centerCrop"
+        tools:ignore="ContentDescription" />
 
-    <EditText
-        android:id="@+id/inputMdp"
-        android:layout_width="276dp"
-        android:layout_height="43dp"
-        android:ems="10"
-        android:inputType="textPassword"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.229" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="30dp">
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="264dp"
-        android:layout_height="50dp"
-        android:background="#A32525"
-        android:backgroundTint="#FF0000"
-        android:drawableTint="#000000"
-        android:fontFamily="@font/baloo"
-        android:text="inscription"
-        android:textColor="#FFFFFF"
-        android:textColorHighlight="#4A2525"
-        android:textColorHint="#000000"
-        android:textColorLink="#000000"
-        app:iconTint="#3F51B5"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.537"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.66"
-        app:rippleColor="#000000"
-        app:strokeColor="#000000" />
+        <EditText
+            android:id="@+id/inputEmail"
+            android:layout_width="291dp"
+            android:layout_height="60dp"
+            android:ems="10"
+            android:fontFamily="@font/baloo"
+            android:hint="email"
+            android:textColorHint="#38504F"
+            android:textColor="#FFFFFF"
+            android:inputType="textEmailAddress"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.487" />
 
-    <EditText
-        android:id="@+id/inputPhone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="phone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.466" />
+        <EditText
+            android:id="@+id/inputMdp"
+            android:layout_width="291dp"
+            android:layout_height="60dp"
+            android:ems="10"
+            android:fontFamily="@font/baloo"
+            android:hint="mot de passe"
+            android:textColorHint="#38504F"
+            android:inputType="textPassword"
+            android:textColor="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.576" />
 
-    <EditText
-        android:id="@+id/inputNom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.293" />
+        <EditText
+            android:id="@+id/inputPhone"
+            android:layout_width="291dp"
+            android:layout_height="60dp"
+            android:ems="10"
+            android:fontFamily="@font/baloo"
+            android:hint="numéro de téléphone"
+            android:textColorHint="#38504F"
+            android:textColor="#FFFFFF"
+            android:inputType="phone"
+            android:pointerIcon="cell"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.397" />
 
-    <EditText
-        android:id="@+id/inputPrenom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.374" />
+        <EditText
+            android:id="@+id/inputNom"
+            android:layout_width="291dp"
+            android:layout_height="60dp"
+            android:ems="10"
+            android:textColor="#FFFFFF"
+            android:fontFamily="@font/baloo"
+            android:hint="nom de famille"
+            android:inputType="text"
+            android:textColorHint="#38504F"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.309" />
+
+        <EditText
+            android:id="@+id/inputPrenom"
+            android:layout_width="291dp"
+            android:layout_height="60dp"
+            android:ems="10"
+            android:fontFamily="@font/baloo"
+            android:hint="prénom"
+            android:textColorHint="#38504F"
+            android:inputType="text"
+            android:textColor="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.219" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="264dp"
+            android:layout_height="50dp"
+            android:backgroundTint="#020202"
+            android:drawableTint="#000000"
+            android:fontFamily="@font/baloo"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="inscription"
+            android:textColor="#FFFFFF"
+            android:textColorHighlight="#4A2525"
+            android:textColorHint="#000000"
+            android:textColorLink="#000000"
+            app:cornerRadius="0dp"
+            app:iconPadding="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.496"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.738" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#446C6C"
+            android:fontFamily="@font/baloo"
+            android:text="Connexion"
+            app:cornerRadius="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.827" />
+
+        <TextView
+            android:id="@+id/errorMessageInscription"
+            android:layout_width="281dp"
+            android:layout_height="37dp"
+            android:fontFamily="@font/baloo"
+            android:text=""
+            android:textColor="#FF0000"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.561"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.655" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="216dp"
+            android:layout_height="70dp"
+            android:fontFamily="@font/baloo"
+            android:text="NavMtl"
+            android:textColor="#C0CDCD"
+            android:textSize="60sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.043" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
