@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Style personnalisé pour le fragment AutocompleteSupportFragment -->
+    <style name="MyAutocompleteFragmentStyle">
+        <!-- Personnalisation des couleurs -->
+        <item name="android:background">#FFFFFF</item>
+        <item name="android:textColor">#582828</item>
+        <!-- Personnalisation de la police -->
+        <item name="android:fontFamily">@font/baloo</item>
+        <item name="android:textSize">16sp</item>
+        <!-- Autres attributs de personnalisation -->
+    </style>
+</resources>

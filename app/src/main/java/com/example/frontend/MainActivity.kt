@@ -36,6 +36,17 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment.*
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
+import com.google.android.gms.common.api.Status
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -46,6 +57,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var bottomSheet: LinearLayout
     private var initialHeight = 500
     private lateinit var token: String // Déclarez le token ici
+    private lateinit var placesClient: PlacesClient
+    private lateinit var autoCompleteFragment: AutocompleteSupportFragment
+    private lateinit var editTextAddress: EditText
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,11 +111,38 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         drawerLayout = findViewById(R.id.drawer_layout)
         menuButton = findViewById(R.id.menu_button)
 
+
+
         // Initialize the map
         mapFragment.getMapAsync(this)
 
         // Set the initial fragment to the map fragment
         replaceFragment(mapFragment)
+
+        Places.initialize(applicationContext, "AIzaSyAUcUujvbKP4jVrmo3I00MNI8pdar4Ag0g")
+        val placesClient = Places.createClient(this)
+        val autocompleteFragment = supportFragmentManager.findFragmentById(R.id.place_autocomplete_fragment)
+                as AutocompleteSupportFragment
+        val montrealLatLngBounds = LatLngBounds(LatLng(45.4215, -73.5696), LatLng(45.6983, -73.4828))
+        autocompleteFragment.setLocationBias(RectangularBounds.newInstance(montrealLatLngBounds))
+
+// Specify the types of place data to return (in this case, just addresses)
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS))
+        editTextAddress = findViewById(R.id.editTextAddress)
+// Set up the listener for place selection
+        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onPlaceSelected(place: Place) {
+                val selectedAddress = place.address
+                // Display the selected address in the EditText
+                editTextAddress.setText(selectedAddress)
+            }
+
+            override fun onError(status: com.google.android.gms.common.api.Status) {
+                val errorMessage = status.statusMessage
+                // Handle errors, e.g., show a Toast message
+                Toast.makeText(applicationContext, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
+            }
+        })
 
         // Handle menu button click to open/close the navigation menu
         menuButton.setOnClickListener {
@@ -116,6 +158,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.isHideable = true
         bottomSheetBehavior.peekHeight = 500
+
     }
 
     private fun replaceFragment(fragment: Fragment) {
@@ -147,8 +190,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView)
 
 // Définir le comportement du fond de la feuille
-        bottomSheetBehavior.isHideable = true
-        bottomSheetBehavior.peekHeight = 200
+        bottomSheetBehavior.isHideable = false
+        bottomSheetBehavior.peekHeight = 500
 
 
 // Charger l'image depuis les ressources
@@ -203,10 +246,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 // Handle Menu Item 1 click
                 Toast.makeText(this, "Menu Item 1 clicked", Toast.LENGTH_SHORT).show()
             }
-            R.id.menu_item_amis -> {
-                // Handle Menu Item 2 click
-                Toast.makeText(this, "Menu Item 2 clicked", Toast.LENGTH_SHORT).show()
-            }
+
             // Add more cases for other menu items/buttons as needed
         }
     }

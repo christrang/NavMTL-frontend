@@ -44,6 +44,7 @@ android {
 }
 
 dependencies {
+    implementation("com.google.android.libraries.places:places:3.2.0")
     val room_version = "2.5.2"
     implementation ("com.google.maps.android:android-maps-utils:2.2.0")
     implementation ("com.google.android.material:material:1.9.0")
