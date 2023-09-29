@@ -45,6 +45,8 @@ android {
 
 dependencies {
     val room_version = "2.5.2"
+    implementation ("com.google.maps.android:android-maps-utils:2.2.0")
+    implementation ("com.google.android.material:material:1.9.0")
     kapt("androidx.room:room-compiler:$room_version")
     implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
     implementation("androidx.navigation:navigation-ui-ktx:2.3.5")

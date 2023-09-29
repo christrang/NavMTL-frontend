@@ -24,42 +24,158 @@
             app:layout_constraintRight_toRightOf="parent" />
 
         <!-- Button to open the navigation menu -->
-        <Button
+        <ImageButton
             android:id="@+id/menu_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Menu"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_centerInParent="true"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#00FFFFFF"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:src="@drawable/hamburger"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="56dp"
+            android:layout_height="48dp"
+            android:background="@null"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/map_fragment"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.954"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/map_fragment"
+            app:layout_constraintVertical_bias="0.023"
+            app:srcCompat="@drawable/spotify" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Navigation menu -->
     <LinearLayout
         android:id="@+id/menu_layout"
-        android:layout_width="280dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@android:color/white">
+        android:layout_gravity="start|top"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp">
 
-        <!-- Menu items/buttons -->
+        <!-- Bouton Profil -->
         <Button
             android:id="@+id/menu_item_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Menu Item 1"
-            android:onClick="handleMenuItemClick" />
+            android:backgroundTint="@color/grey"
+            android:fontFamily="@font/baloo"
+            android:onClick="handleMenuItemClick"
+            android:text="Profil"
+            android:textColor="#000000"
+            app:icon="@drawable/utilisateur"
+            app:iconTint="#000000" />
+
+        <!-- Bouton Favoris -->
         <Button
-            android:id="@+id/menu_item_2"
+            android:id="@+id/menu_item_favoris"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Menu Item 2"
-            android:onClick="handleMenuItemClick" />
-        <!-- Add more menu items/buttons as needed -->
+            android:backgroundTint="@color/grey"
+            android:fontFamily="@font/baloo"
+            android:onClick="handleMenuItemClick"
+            android:text="Favoris"
+            android:textColor="#000000"
+            app:icon="@drawable/favori"
+            app:iconTint="#000000" />
+
+        <!-- Bouton Historique -->
+        <Button
+            android:id="@+id/menu_item_historique"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/grey"
+            android:fontFamily="@font/baloo"
+            android:onClick="handleMenuItemClick"
+            android:text="Historique"
+            android:textColor="#000000"
+            app:icon="@drawable/bouton_dhorloge_historique"
+            app:iconTint="#000000" />
+
+        <!-- Bouton Amis -->
+        <Button
+            android:id="@+id/menu_item_amis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/grey"
+            android:fontFamily="@font/baloo"
+            android:onClick="handleMenuItemClick"
+            android:text="Amis"
+            android:textColor="#000000"
+            app:icon="@drawable/amis"
+            app:iconTint="#000000" />
+
+        <!-- Bouton Paramètres -->
+        <Button
+            android:id="@+id/menu_item_parametres"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/grey"
+            android:fontFamily="@font/baloo"
+            android:onClick="handleMenuItemClick"
+            android:text="Paramètres"
+            android:textColor="#000000"
+            app:icon="@drawable/parametres"
+            app:iconTint="#000000" />
+
+        <!-- Ajoutez d'autres boutons de menu si nécessaire -->
 
     </LinearLayout>
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
+        <LinearLayout
+            android:id="@+id/bottom_sheet"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="@color/grey"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+            <!-- Ajoutez ici les éléments de votre menu -->
+
+            <Button
+                android:id="@+id/button_show_bottom_sheet"
+                android:layout_width="61dp"
+                android:layout_height="11dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp"
+                android:backgroundTint="@color/black"
+                android:clickable="false"
+                android:visibility="visible" />
+
+            <EditText
+                android:id="@+id/editTextText"
+                android:layout_width="367dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_edittext_bg"
+                android:backgroundTint="#7C8588"
+                android:drawableStart="@drawable/loupe"
+                android:drawableLeft="@drawable/loupe"
+                android:ems="10"
+                android:fontFamily="@font/baloo"
+                android:hint="Où va-t-on?"
+                android:inputType="text"
+                android:lineSpacingExtra="14sp"
+                android:textAlignment="textStart"
+                app:startIconDrawable="@drawable/loupe" />
+
+            <!-- Ajoutez davantage d'éléments de menu si nécessaire -->
+        </LinearLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </androidx.drawerlayout.widget.DrawerLayout>
