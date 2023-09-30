@@ -117,10 +117,12 @@ class Repository(val app: Application) {
                     val descriptionRpa = record.getString("DESCRIPTION_RPA")
                     val longitude = record.getString("Longitude")
                     val latitude = record.getString("Latitude")
-                    val flechePan = record.getString("FLECHE_PAN") // Récupérez la valeur de la flèche du panneau depuis le JSON
+                    val flechePan = record.getString("FLECHE_PAN")
+                    val DESCRIPTION_REP = record.getString("DESCRIPTION_REP")
+                    // Récupérez la valeur de la flèche du panneau depuis le JSON
 
                     // Créez un objet Panneau avec les données extraites
-                    val panneau = Panneau(descriptionRpa, longitude, latitude, flechePan)
+                    val panneau = Panneau(descriptionRpa, longitude, latitude, flechePan, DESCRIPTION_REP)
                     panneauxList.add(panneau)
                 }
 

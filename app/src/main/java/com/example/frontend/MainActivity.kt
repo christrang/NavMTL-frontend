@@ -1,53 +1,40 @@
 package com.example.frontend
 
 import android.annotation.SuppressLint
-import android.widget.ImageButton
-
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
-import androidx.drawerlayout.widget.DrawerLayout
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.Toast
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import androidx.core.view.GravityCompat
-import com.google.maps.android.SphericalUtil
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.MarkerOptions
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
-import com.android.volley.Request
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.PolylineOptions
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.*
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.RectangularBounds
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment.*
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
-import com.google.android.gms.common.api.Status
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.libraries.places.api.model.RectangularBounds
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
-
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.maps.GeoApiContext
+import com.google.maps.DirectionsApi
+import com.google.maps.android.SphericalUtil
+import com.google.maps.model.DirectionsResult
+import com.google.android.gms.maps.model.LatLng
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private val fragmentManager: FragmentManager = supportFragmentManager
@@ -56,95 +43,66 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var menuButton: ImageButton
     private lateinit var bottomSheet: LinearLayout
     private var initialHeight = 500
-    private lateinit var token: String // Déclarez le token ici
+    private lateinit var token: String
     private lateinit var placesClient: PlacesClient
     private lateinit var autoCompleteFragment: AutocompleteSupportFragment
     private lateinit var editTextAddress: EditText
+    private lateinit var googleMap: GoogleMap // Ajout de la référence à GoogleMap
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         window.statusBarColor = ContextCompat.getColor(this, R.color.grey)
-         fun handleTouch(event: MotionEvent) {
-            val layoutParams = bottomSheet.layoutParams
-            when (event.action) {
-                MotionEvent.ACTION_MOVE -> {
-                    val newHeight = initialHeight - event.rawY.toInt()
-                    if (newHeight >= 0) {
-                        // Ajustez la hauteur de la vue du bas en fonction du geste
-                        layoutParams.height = newHeight
-                        bottomSheet.layoutParams = layoutParams
-                    }
-                }
-                MotionEvent.ACTION_UP -> {
-                    // Lorsque l'utilisateur relâche, vous pouvez vérifier la hauteur actuelle
-                    // Si la hauteur est inférieure à un certain seuil, ajustez-la à la hauteur initiale
-                    if (layoutParams.height < initialHeight / 2) {
-                        layoutParams.height = initialHeight
-                    } else {
-                        // Sinon, ajustez la hauteur pour qu'elle prenne tout l'écran
-                        layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-                    }
-                    bottomSheet.layoutParams = layoutParams
-                }
-            }
-        }
+
         bottomSheet = findViewById(R.id.bottom_sheet)
-        initialHeight = resources.getDimensionPixelSize(R.dimen.initial_height) // Remplacez R.dimen.initial_height par la ressource appropriée
+        initialHeight = resources.getDimensionPixelSize(R.dimen.initial_height)
 
-        bottomSheet.setOnTouchListener { _, event ->
-            handleTouch(event)
-            true
-        }
-
-        // Récupérer le token depuis SharedPreferences dans la méthode onCreate
+        // Récupérer le token depuis SharedPreferences
         val sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         token = sharedPrefs.getString("token", null) ?: ""
-
-        if (token.isNotEmpty()) {
-            // Utilisez le token comme vous le souhaitez dans cette activité
-            // Par exemple, vous pouvez l'afficher dans un TextView
-            Log.d("LoginActivity", "Token: $token")
-        }
 
         drawerLayout = findViewById(R.id.drawer_layout)
         menuButton = findViewById(R.id.menu_button)
 
-
-
         // Initialize the map
         mapFragment.getMapAsync(this)
-
-        // Set the initial fragment to the map fragment
         replaceFragment(mapFragment)
 
-        Places.initialize(applicationContext, "AIzaSyAUcUujvbKP4jVrmo3I00MNI8pdar4Ag0g")
+        Places.initialize(applicationContext, "AIzaSyAUcUujvbKP4jVrmo3I00MNI8pdar4Ag0g") // Remplacez par votre clé API Google Maps
         val placesClient = Places.createClient(this)
         val autocompleteFragment = supportFragmentManager.findFragmentById(R.id.place_autocomplete_fragment)
                 as AutocompleteSupportFragment
+
+        // Specify location bias for autocomplete
         val montrealLatLngBounds = LatLngBounds(LatLng(45.4215, -73.5696), LatLng(45.6983, -73.4828))
         autocompleteFragment.setLocationBias(RectangularBounds.newInstance(montrealLatLngBounds))
 
-// Specify the types of place data to return (in this case, just addresses)
-        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS))
+        // Specify the types of place data to return (in this case, just addresses)
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG))
         editTextAddress = findViewById(R.id.editTextAddress)
-// Set up the listener for place selection
+
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
-                val selectedAddress = place.address
-                // Display the selected address in the EditText
-                editTextAddress.setText(selectedAddress)
+                val montreal = LatLng(45.5017, -73.5673)
+                val selectedLatLng = place.latLng
+                Log.e("place", place.toString())
+                if (selectedLatLng != null) {
+                    // Utilisez selectedLatLng pour obtenir les coordonnées (latitude et longitude)
+                    getDirections(montreal, selectedLatLng)
+                } else {
+                    // La position sélectionnée n'a pas de coordonnées valides
+                    Log.e("place", montreal.toString())
+                    Toast.makeText(applicationContext, "Coordonnées non disponibles", Toast.LENGTH_SHORT).show()
+                }
             }
 
             override fun onError(status: com.google.android.gms.common.api.Status) {
                 val errorMessage = status.statusMessage
-                // Handle errors, e.g., show a Toast message
                 Toast.makeText(applicationContext, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
             }
         })
 
-        // Handle menu button click to open/close the navigation menu
         menuButton.setOnClickListener {
             if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 drawerLayout.closeDrawer(GravityCompat.START)
@@ -152,13 +110,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 drawerLayout.openDrawer(GravityCompat.START)
             }
         }
-        val bottomSheet = findViewById<LinearLayout>(R.id.bottom_sheet)
 
-// Configurez le comportement du BottomSheet
-        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        val bottomSheetView = findViewById<LinearLayout>(R.id.bottom_sheet)
+        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView)
         bottomSheetBehavior.isHideable = true
         bottomSheetBehavior.peekHeight = 500
-
     }
 
     private fun replaceFragment(fragment: Fragment) {
@@ -169,7 +125,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        // Set up the map configuration when it's ready
+        this.googleMap = googleMap // Assigner la référence à googleMap
+
         val repository = Repository(application)
         val montreal = LatLng(45.5017, -73.5673)
 
@@ -186,21 +143,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val panneauxProches = mutableListOf<Panneau>()
         val width = 40
         val height = 40
-        val bottomSheetView = findViewById<LinearLayout>(R.id.bottom_sheet)
-        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView)
 
-// Définir le comportement du fond de la feuille
-        bottomSheetBehavior.isHideable = false
-        bottomSheetBehavior.peekHeight = 500
-
-
-// Charger l'image depuis les ressources
+        // Charger l'image depuis les ressources
         val bitmap = BitmapFactory.decodeResource(resources, R.drawable.parking)
 
-// Redimensionner l'image à la taille souhaitée
+        // Redimensionner l'image à la taille souhaitée
         val resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false)
 
-// Créer un BitmapDescriptor à partir de l'image redimensionnée
+        // Créer un BitmapDescriptor à partir de l'image redimensionnée
         val customMarkerIcon = BitmapDescriptorFactory.fromBitmap(resizedBitmap)
         // Récupérez la liste des panneaux depuis votre API
         repository.getPanneaux(object : PanneauxCallback {
@@ -216,23 +166,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                     // Vérifier si la distance est inférieure ou égale à la distance limite
                     if (distance <= distanceLimiteEnMetres) {
                         // Ajouter le panneau à la liste des panneaux proches
-
-                        // Vérifier si FLECHE_PAN n'est pas égal à "0" avant d'ajouter la polyline
-                        if (panneau.flechePan != "0") {
+                        if (panneau.DESCRIPTION_REP != "Enlevé") {
                             // Ajouter un marqueur pour le desrpa
                             val desrpaMarker = MarkerOptions()
                                 .position(panneauLocation)
                                 .title("DESRPA: ${panneau.description},${panneau.flechePan}")
                                 .icon(customMarkerIcon)
                             googleMap.addMarker(desrpaMarker)
-                        }
+
+                    }
                     }
                 }
+
             }
 
             override fun onError(errorMessage: String) {
-                // Traitez les erreurs ici
-                // Par exemple, affichez un message d'erreur à l'utilisateur
                 Toast.makeText(this@MainActivity, "Erreur : $errorMessage", Toast.LENGTH_SHORT).show()
                 Log.e("Error Panneaux", errorMessage)
             }
@@ -240,14 +188,78 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     // Handle menu item/button clicks here
-    fun handleMenuItemClick(view: android.view.View) {
+    fun handleMenuItemClick(view: View) {
         when (view.id) {
             R.id.menu_item_1 -> {
-                // Handle Menu Item 1 click
                 Toast.makeText(this, "Menu Item 1 clicked", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+    private val markers: MutableList<Marker> = mutableListOf()
+    private var currentPolyline: Polyline? = null
+    private fun getDirections(startLatLng: LatLng, endLatLng: LatLng) {
+        val context = GeoApiContext.Builder()
+            .apiKey("AIzaSyAUcUujvbKP4jVrmo3I00MNI8pdar4Ag0g") // Remplacez par votre clé API Google Maps
+            .build()
 
-            // Add more cases for other menu items/buttons as needed
+        val request = DirectionsApi.getDirections(
+            context,
+            "${startLatLng.latitude},${startLatLng.longitude}",
+            "${endLatLng.latitude},${endLatLng.longitude}"
+        )
+
+        try {
+            val result: DirectionsResult = request.await()
+
+            // Supprimer les anciens marqueurs s'il y en a
+            for (marker in markers) {
+                marker.remove()
+            }
+            markers.clear()
+
+            // Créer une liste de points pour la nouvelle polyline
+            val polylineOptions = PolylineOptions()
+            val steps = result.routes[0].legs[0].steps
+            for (step in steps) {
+                val points = step.polyline.decodePath()
+                for (point in points) {
+                    polylineOptions.add(LatLng(point.lat, point.lng))
+                }
+            }
+            polylineOptions.width(20f)
+
+            // Supprimer l'ancienne polyline s'il y en a une
+            currentPolyline?.remove()
+
+            // Ajouter la nouvelle polyline à la carte
+            val newPolyline = googleMap.addPolyline(polylineOptions)
+
+            // Mémoriser la nouvelle polyline comme étant la "currentPolyline"
+            currentPolyline = newPolyline
+
+            // ... (code pour les nouveaux marqueurs)
+            // Ajouter les nouveaux marqueurs à la liste
+            val originMarkerOptions = MarkerOptions()
+                .position(startLatLng)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.forme_abstraite)) // Replace with your origin icon resource
+                .title("Origin")
+
+            val destinationMarkerOptions = MarkerOptions()
+                .position(endLatLng)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.rhombe)) // Replace with your destination icon resource
+                .title("Destination")
+
+            val originMarker = googleMap.addMarker(originMarkerOptions)
+            val destinationMarker = googleMap.addMarker(destinationMarkerOptions)
+
+            if (originMarker != null) {
+                markers.add(originMarker)
+            }
+            if (destinationMarker != null) {
+                markers.add(destinationMarker)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }
