@@ -97,7 +97,7 @@
 
                                     <TextView
                                         android:id="@+id/email"
-                                        android:layout_width="236dp"
+                                        android:layout_width="200dp"
                                         android:layout_height="30dp"
                                         android:layout_marginEnd="10dp"
                                         android:layout_weight="1"
@@ -106,6 +106,7 @@
                                         android:textSize="16sp"
                                         app:layout_constraintBottom_toBottomOf="parent"
                                         app:layout_constraintEnd_toEndOf="parent"
+                                        app:layout_constraintHorizontal_bias="0.0"
                                         app:layout_constraintStart_toEndOf="@+id/textView"
                                         app:layout_constraintTop_toTopOf="parent"
                                         app:layout_constraintVertical_bias="0.078"
@@ -130,23 +131,24 @@
 
                                     <TextView
                                         android:id="@+id/prenom"
-                                        android:layout_width="236dp"
+                                        android:layout_width="200dp"
                                         android:layout_height="30dp"
                                         android:layout_marginEnd="10dp"
-                                        android:layout_marginBottom="228dp"
+                                        android:layout_marginBottom="224dp"
                                         android:layout_weight="1"
                                         android:text="first name"
                                         android:textAlignment="textEnd"
                                         android:textSize="16sp"
                                         app:layout_constraintBottom_toBottomOf="parent"
                                         app:layout_constraintEnd_toEndOf="parent"
+                                        app:layout_constraintHorizontal_bias="0.0"
                                         app:layout_constraintStart_toEndOf="@+id/textView2"
-                                        app:layout_constraintTop_toBottomOf="@+id/textView3"
-                                        app:layout_constraintVertical_bias="1.0" />
+                                        app:layout_constraintTop_toBottomOf="@+id/nom"
+                                        app:layout_constraintVertical_bias="0.909" />
 
                                     <TextView
                                         android:id="@+id/mdp"
-                                        android:layout_width="236dp"
+                                        android:layout_width="200dp"
                                         android:layout_height="30dp"
                                         android:layout_marginEnd="10dp"
                                         android:layout_weight="1"
@@ -162,7 +164,7 @@
 
                                     <TextView
                                         android:id="@+id/telephone"
-                                        android:layout_width="236dp"
+                                        android:layout_width="200dp"
                                         android:layout_height="30dp"
                                         android:layout_marginEnd="10dp"
                                         android:layout_marginBottom="160dp"
@@ -244,7 +246,7 @@
 
                                     <TextView
                                         android:id="@+id/nom"
-                                        android:layout_width="236dp"
+                                        android:layout_width="200dp"
                                         android:layout_height="30dp"
                                         android:layout_weight="1"
                                         android:text="last name"
@@ -256,6 +258,22 @@
                                         app:layout_constraintStart_toEndOf="@+id/textView"
                                         app:layout_constraintTop_toBottomOf="@+id/email"
                                         app:layout_constraintVertical_bias="0.077" />
+
+                                    <ImageView
+                                        android:id="@+id/imageView"
+                                        android:layout_width="50dp"
+                                        android:layout_height="50dp"
+                                        android:alpha=".5"
+                                        android:background="@null"
+                                        android:scaleType="fitCenter"
+                                        android:visibility="visible"
+                                        app:layout_constraintBottom_toBottomOf="parent"
+                                        app:layout_constraintEnd_toEndOf="parent"
+                                        app:layout_constraintStart_toStartOf="parent"
+                                        app:layout_constraintTop_toTopOf="parent"
+                                        app:layout_constraintVertical_bias="0.858"
+                                        app:srcCompat="@drawable/editicon" />
+
                                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                             </androidx.constraintlayout.widget.ConstraintLayout>

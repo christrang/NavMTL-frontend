@@ -16,7 +16,7 @@ import java.io.IOException
 class ProfileActivity : AppCompatActivity() {
 
     private val url = "http://192.168.5.20/user"
-    private lateinit var AUTH_TOKEN: String // Declare AUTH_TOKEN as lateinit var
+    private lateinit var AUTH_TOKEN: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +40,7 @@ class ProfileActivity : AppCompatActivity() {
                     .build()
 
                 val response = client.newCall(request).execute()
-                val responseData = response.body()?.string()
+                val responseData = response.body?.string()
 
                 withContext(Dispatchers.Main) {
                     if (responseData != null) {
