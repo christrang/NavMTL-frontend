@@ -40,7 +40,7 @@ class ProfileActivity : AppCompatActivity() {
                     .build()
 
                 val response = client.newCall(request).execute()
-                val responseData = response.body()?.string()
+                val responseData = response.body?.string()
 
                 withContext(Dispatchers.Main) {
                     if (responseData != null) {
