@@ -2,6 +2,7 @@ package com.example.frontend
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -42,7 +43,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var menuButton: ImageButton
     private lateinit var bottomSheet: LinearLayout
-    private var initialHeight = 500
+    private var initialHeight = 200
     private lateinit var token: String
     private lateinit var placesClient: PlacesClient
     private lateinit var autoCompleteFragment: AutocompleteSupportFragment
@@ -54,7 +55,37 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         window.statusBarColor = ContextCompat.getColor(this, R.color.grey)
+        fun handleTouch(event: MotionEvent) {
+            val layoutParams = bottomSheet.layoutParams
+            when (event.action) {
+                MotionEvent.ACTION_MOVE -> {
+                    val newHeight = initialHeight - event.rawY.toInt()
+                    if (newHeight >= 0) {
+                        // Ajustez la hauteur de la vue du bas en fonction du geste
+                        layoutParams.height = newHeight
+                        bottomSheet.layoutParams = layoutParams
+                    }
+                }
+                MotionEvent.ACTION_UP -> {
+                    // Lorsque l'utilisateur relâche, vous pouvez vérifier la hauteur actuelle
+                    // Si la hauteur est inférieure à un certain seuil, ajustez-la à la hauteur initiale
+                    if (layoutParams.height < initialHeight / 2) {
+                        layoutParams.height = initialHeight
+                    } else {
+                        // Sinon, ajustez la hauteur pour qu'elle prenne tout l'écran
+                        layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                    }
+                    bottomSheet.layoutParams = layoutParams
+                }
+            }
+        }
+        bottomSheet = findViewById(R.id.bottom_sheet)
+        initialHeight = resources.getDimensionPixelSize(R.dimen.initial_height) // Remplacez R.dimen.initial_height par la ressource appropriée
 
+        bottomSheet.setOnTouchListener { _, event ->
+            handleTouch(event)
+            true
+        }
         bottomSheet = findViewById(R.id.bottom_sheet)
         initialHeight = resources.getDimensionPixelSize(R.dimen.initial_height)
 
@@ -86,6 +117,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onPlaceSelected(place: Place) {
                 val montreal = LatLng(45.5017, -73.5673)
                 val selectedLatLng = place.latLng
+                val address = place.address
                 Log.e("place", place.toString())
                 if (selectedLatLng != null) {
                     // Utilisez selectedLatLng pour obtenir les coordonnées (latitude et longitude)
@@ -102,19 +134,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 Toast.makeText(applicationContext, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
             }
         })
-
+        val menuButton = findViewById<ImageButton>(R.id.menu_button)
         menuButton.setOnClickListener {
-            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                drawerLayout.closeDrawer(GravityCompat.START)
-            } else {
-                drawerLayout.openDrawer(GravityCompat.START)
-            }
+            val intent = Intent(this, MenuActivity::class.java)
+            startActivity(intent)
+            finish()
         }
 
         val bottomSheetView = findViewById<LinearLayout>(R.id.bottom_sheet)
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView)
-        bottomSheetBehavior.isHideable = true
-        bottomSheetBehavior.peekHeight = 500
+        bottomSheetBehavior.isHideable = false
+        bottomSheetBehavior.peekHeight = 200
     }
 
     private fun replaceFragment(fragment: Fragment) {
@@ -149,9 +179,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Redimensionner l'image à la taille souhaitée
         val resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false)
+        val zoomButton = findViewById<ImageButton>(R.id.zoom_button)
 
+        // Définissez un écouteur de clic pour le bouton
+        zoomButton.setOnClickListener {
+
+            // Effectuer le zoom sur Montréal
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(montreal, 17f))
+        }
         // Créer un BitmapDescriptor à partir de l'image redimensionnée
         val customMarkerIcon = BitmapDescriptorFactory.fromBitmap(resizedBitmap)
+        val positionUser = MarkerOptions()
+            .position(montreal)
+            .icon(BitmapDescriptorFactory.fromResource(R.drawable.la_navigation)) // Replace with your origin icon resource
+            .title("Moi")
+        val positionMarker = googleMap.addMarker(positionUser)
         // Récupérez la liste des panneaux depuis votre API
         repository.getPanneaux(object : PanneauxCallback {
             override fun onSuccess(panneaux: MutableList<Panneau>) {
@@ -188,11 +230,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     // Handle menu item/button clicks here
-    fun handleMenuItemClick(view: View) {
+    fun handleMenuItemClick(view: android.view.View) {
         when (view.id) {
             R.id.menu_item_1 -> {
+                // Handle Menu Item 1 click
                 Toast.makeText(this, "Menu Item 1 clicked", Toast.LENGTH_SHORT).show()
             }
+            R.id.menu_item_favoris -> {
+                // Handle Menu Item 2 click
+                Toast.makeText(this, "Menu Item 2 clicked", Toast.LENGTH_SHORT).show()
+            }
+            // Add more cases for other menu items/buttons as needed
         }
     }
     private val markers: MutableList<Marker> = mutableListOf()
