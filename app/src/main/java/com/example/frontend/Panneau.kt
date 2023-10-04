@@ -1,10 +1,12 @@
 package com.example.frontend
 
-data class Panneau(
+data class RpaData(
+    val Coordonnees: Coordonnees,
+    val Description_RPA: String,
+    val Resultat_Verification: String
+)
 
-val description: String,
-val longitude: String,
-val latitude: String,
-val flechePan: String,
-val DESCRIPTION_REP: String
+data class Coordonnees(
+    val Latitude: String,
+    val Longitude: String
 )

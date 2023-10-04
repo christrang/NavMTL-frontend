@@ -18,6 +18,8 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
@@ -170,7 +172,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val distanceLimiteEnMetres = 500.0 // Définissez la distance limite en mètres
 
         // Liste pour stocker les panneaux proches de Montreal
-        val panneauxProches = mutableListOf<Panneau>()
+        val listePanneau = MutableLiveData<List<RpaData>>()
+
         val width = 40
         val height = 40
 
@@ -195,36 +198,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             .title("Moi")
         val positionMarker = googleMap.addMarker(positionUser)
         // Récupérez la liste des panneaux depuis votre API
-        repository.getPanneaux(object : PanneauxCallback {
-            override fun onSuccess(panneaux: MutableList<Panneau>) {
-                // Filtrer les panneaux proches de Montreal
-                for (panneau in panneaux) {
-                    val panneauLocation =
-                        LatLng(panneau.latitude.toDouble(), panneau.longitude.toDouble())
+        repository.main(listePanneau)
+        // Observez les changements dans listePanneau
+        listePanneau.observe(this, Observer<List<RpaData>> { panneaux ->
+            // Réagissez aux changements dans la liste des panneaux
+            for (panneau in panneaux) {
+                val latitude = panneau.Coordonnees.Latitude
+                val longitude = panneau.Coordonnees.Longitude
+                val descriptionRpa = panneau.Description_RPA
+                val resultatVerification = panneau.Resultat_Verification
 
-                    // Calculer la distance entre le panneau et Montreal
-                    val distance = SphericalUtil.computeDistanceBetween(montreal, panneauLocation)
-
-                    // Vérifier si la distance est inférieure ou égale à la distance limite
-                    if (distance <= distanceLimiteEnMetres) {
-                        // Ajouter le panneau à la liste des panneaux proches
-                        if (panneau.DESCRIPTION_REP != "Enlevé") {
-                            // Ajouter un marqueur pour le desrpa
-                            val desrpaMarker = MarkerOptions()
-                                .position(panneauLocation)
-                                .title("DESRPA: ${panneau.description},${panneau.flechePan}")
-                                .icon(customMarkerIcon)
-                            googleMap.addMarker(desrpaMarker)
-
-                    }
-                    }
-                }
-
-            }
-
-            override fun onError(errorMessage: String) {
-                Toast.makeText(this@MainActivity, "Erreur : $errorMessage", Toast.LENGTH_SHORT).show()
-                Log.e("Error Panneaux", errorMessage)
+                // Utilisez les données comme vous le souhaitez
+                // Par exemple, journalisez-les
+                Log.d("Panneau", "Latitude: $latitude, Longitude: $longitude")
+                Log.d("Panneau", "Description RPA: $descriptionRpa")
+                Log.d("Panneau", "Résultat de la vérification: $resultatVerification")
             }
         })
     }

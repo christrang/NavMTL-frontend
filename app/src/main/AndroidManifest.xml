@@ -31,6 +31,9 @@
             android:name=".InscriptionActivity"
             android:exported="false"/>
         <activity
+            android:name=".MenuActivity"
+            android:exported="false"/>
+        <activity
             android:name=".ProfileActivity"
             android:exported="false"/>
         <activity
