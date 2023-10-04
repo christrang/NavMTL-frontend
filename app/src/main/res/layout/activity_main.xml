@@ -131,6 +131,11 @@
                 android:focusableInTouchMode="false"
                 android:fontFamily="@font/baloo"
                 android:inputType="none" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvHistory"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
             <!-- Add more menu items or content as needed -->
 
         </LinearLayout>
