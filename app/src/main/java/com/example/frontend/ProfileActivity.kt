@@ -1,7 +1,9 @@
 package com.example.frontend
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +27,20 @@ class ProfileActivity : AppCompatActivity() {
         // Retrieve the token from SharedPreferences
         val sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         AUTH_TOKEN = sharedPrefs.getString("token", null) ?: ""
+        val backButton = findViewById<ImageButton>(R.id.back2)
+        val pagebackButton = findViewById<ImageButton>(R.id.fallback)
 
+        backButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
+        pagebackButton.setOnClickListener {
+            val intent = Intent(this, MenuActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
         getProfile()
     }
 
@@ -56,7 +71,7 @@ class ProfileActivity : AppCompatActivity() {
                         // Update UI elements with the fetched data
                         val lastNameTextView = findViewById<TextView>(R.id.nom)
                         val emailTextView = findViewById<TextView>(R.id.email)
-                        val firstNameTextView = findViewById<TextView>(R.id.prenom)
+                        val firstNameTextView = findViewById<TextView>(R.id.nom)
                         val numberTextView = findViewById<TextView>(R.id.telephone)
                         val passwordTextView = findViewById<TextView>(R.id.mdp)
                         val titleNameTextView = findViewById<TextView>(R.id.name)
