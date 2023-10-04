@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var menuButton: ImageButton
     private lateinit var bottomSheet: LinearLayout
-    private var initialHeight = 500
+    private var initialHeight = 200
     private lateinit var token: String
     private lateinit var placesClient: PlacesClient
     private lateinit var autoCompleteFragment: AutocompleteSupportFragment
@@ -117,6 +117,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onPlaceSelected(place: Place) {
                 val montreal = LatLng(45.5017, -73.5673)
                 val selectedLatLng = place.latLng
+                val address = place.address
                 Log.e("place", place.toString())
                 if (selectedLatLng != null) {
                     // Utilisez selectedLatLng pour obtenir les coordonnées (latitude et longitude)
@@ -133,19 +134,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 Toast.makeText(applicationContext, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
             }
         })
-
+        val menuButton = findViewById<ImageButton>(R.id.menu_button)
         menuButton.setOnClickListener {
-            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                drawerLayout.closeDrawer(GravityCompat.START)
-            } else {
-                drawerLayout.openDrawer(GravityCompat.START)
-            }
+            val intent = Intent(this, MenuActivity::class.java)
+            startActivity(intent)
+            finish()
         }
 
         val bottomSheetView = findViewById<LinearLayout>(R.id.bottom_sheet)
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView)
         bottomSheetBehavior.isHideable = false
-        bottomSheetBehavior.peekHeight = 500
+        bottomSheetBehavior.peekHeight = 200
     }
 
     private fun replaceFragment(fragment: Fragment) {
