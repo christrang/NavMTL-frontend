@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.text.Editable
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -18,11 +19,14 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.google.android.gms.common.api.Status
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import com.google.android.libraries.places.api.Places
@@ -38,7 +42,6 @@ import com.google.maps.DirectionsApi
 import com.google.maps.android.SphericalUtil
 import com.google.maps.model.DirectionsResult
 import com.google.android.gms.maps.model.LatLng
-
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private val fragmentManager: FragmentManager = supportFragmentManager
     private val mapFragment = SupportMapFragment.newInstance()
@@ -51,6 +54,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var autoCompleteFragment: AutocompleteSupportFragment
     private lateinit var editTextAddress: EditText
     private lateinit var googleMap: GoogleMap // Ajout de la référence à GoogleMap
+    private lateinit var rv: RecyclerView
+    private var selectedAddress: String = ""
+    private val historyList: MutableList<History> = mutableListOf()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -115,8 +121,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG))
         editTextAddress = findViewById(R.id.editTextAddress)
 
+        rv =findViewById(R.id.rvHistory)
+        rv.adapter = HistoryRecycleView(historyList)
+        rv.layoutManager = LinearLayoutManager(this)
+
+
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
+                handlePlaceSelection(place)
                 val montreal = LatLng(45.5017, -73.5673)
                 val selectedLatLng = place.latLng
                 val address = place.address
@@ -231,6 +243,30 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             // Add more cases for other menu items/buttons as needed
         }
     }
+
+    private fun handlePlaceSelection(place: Place) {
+        // Retrieve the selected place's address
+        val address = selectedAddress ?: ""
+
+        // Add the selected address to the history list
+        historyList.add(History(address, place.latLng.toString()))
+
+        // Notify the RecyclerView adapter that the data has changed
+        rv.adapter?.notifyDataSetChanged()
+
+        // Set the selected address to the EditText
+        editTextAddress.text = Editable.Factory.getInstance().newEditable(address)
+
+        val montreal = LatLng(45.5017, -73.5673)
+        val selectedLatLng = place.latLng
+        if (selectedLatLng != null) {
+            getDirections(montreal, selectedLatLng)
+        } else {
+            Log.e("place", montreal.toString())
+            Toast.makeText(applicationContext, "Coordonnées non disponibles", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private val markers: MutableList<Marker> = mutableListOf()
     private var currentPolyline: Polyline? = null
     private fun getDirections(startLatLng: LatLng, endLatLng: LatLng) {
