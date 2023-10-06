@@ -7,6 +7,6 @@ data class RpaData(
 )
 
 data class Coordonnees(
-    val Latitude: String,
-    val Longitude: String
+    val Latitude: Double,
+    val Longitude: Double
 )
