@@ -94,9 +94,24 @@
 
                         <!-- Friend-related UI elements -->
 
-                        <!-- Back Button -->
-
                         <!-- Search Button -->
+
+                        <TextView
+                            android:id="@+id/searchResultTextView"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="24dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginEnd="24dp"
+                            android:gravity="center"
+                            android:text=""
+                            android:textSize="16sp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="0.0"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/searchEditText" />
+
+                        <!-- Add Friend Button -->
                         <Button
                             android:id="@+id/searchButton"
                             android:layout_width="wrap_content"
@@ -105,9 +120,12 @@
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/addFriendButton"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintVertical_bias="0.582" />
 
-                        <!-- Add Friend Button -->
+                        <!-- Remove Friend Button -->
+
+                        <!-- Search EditText -->
                         <Button
                             android:id="@+id/addFriendButton"
                             android:layout_width="wrap_content"
@@ -116,9 +134,9 @@
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/removeFriendButton"
                             app:layout_constraintStart_toEndOf="@+id/searchButton"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintVertical_bias="0.582" />
 
-                        <!-- Remove Friend Button -->
                         <Button
                             android:id="@+id/removeFriendButton"
                             android:layout_width="wrap_content"
@@ -127,9 +145,9 @@
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toEndOf="@+id/addFriendButton"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintVertical_bias="0.582" />
 
-                        <!-- Search EditText -->
                         <EditText
                             android:id="@+id/searchEditText"
                             android:layout_width="0dp"

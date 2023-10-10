@@ -21,7 +21,7 @@ import java.io.IOException
 
 class FriendActivity : AppCompatActivity() {
 
-    private val baseUrl = "http://192.168.5.20/friend"
+    private val baseUrl = "https://navmtl-543ba0ee6069.herokuapp.com/friend"
     private lateinit var AUTH_TOKEN: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,9 +74,49 @@ class FriendActivity : AppCompatActivity() {
     }
 
     private fun searchFriends(query: String) {
-        // Implement logic to search for friends by name or other criteria
-        // Example: performSearch(query)
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .url("$baseUrl/$query") // Assuming the query is the user ID
+                    .header("Authorization", "Bearer $AUTH_TOKEN")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                handleSearchFriendsResponse(response)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
     }
+
+    private suspend fun handleSearchFriendsResponse(response: Response) {
+        val responseData = response.body?.string()
+
+        withContext(Dispatchers.Main) {
+            if (response.isSuccessful && responseData != null) {
+                val jsonObject = JSONObject(responseData)
+
+                // Assuming the API returns user details as JSON
+                val userId = jsonObject.optInt("userID")
+                val userName = jsonObject.optString("userName")
+                val userFullName = jsonObject.optString("fullName")
+
+                // Update the UI to display the user details
+                val searchResultTextView = findViewById<TextView>(R.id.searchResultTextView)
+                searchResultTextView.text = "User ID: $userId\nUsername: $userName\nFull Name: $userFullName"
+            } else {
+                // Handle the error response or no user found
+                // Example: displayErrorMessage(response.message)
+
+                // Clear the search result TextView if there's an error or no result
+                val searchResultTextView = findViewById<TextView>(R.id.searchResultTextView)
+                searchResultTextView.text = response.message
+            }
+        }
+    }
+
+
 
     private fun loadFriendList() {
         GlobalScope.launch(Dispatchers.IO) {
