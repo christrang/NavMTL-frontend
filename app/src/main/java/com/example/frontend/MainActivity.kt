@@ -186,9 +186,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         // Liste pour stocker les panneaux proches de Montreal
         val listePanneau = MutableLiveData<List<RpaData>>()
 
-
-
-
         // Redimensionner l'image à la taille souhaitée
         val zoomButton = findViewById<ImageButton>(R.id.zoom_button)
 
@@ -203,53 +200,76 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             .position(montreal)
             .icon(BitmapDescriptorFactory.fromResource(R.drawable.la_navigation)) // Replace with your origin icon resource
             .title("Moi")
-        val positionMarker = googleMap.addMarker(positionUser)
+         googleMap.addMarker(positionUser)
+
         // Récupérez la liste des panneaux depuis votre API
         repository.main(listePanneau)
+
+        // Fonction pour calculer la distance entre deux points en mètres
+        fun calculateDistance(point1: LatLng, point2: LatLng): Double {
+            val earthRadius = 6371000.0 // Rayon de la Terre en mètres
+            val lat1 = Math.toRadians(point1.latitude)
+            val lon1 = Math.toRadians(point1.longitude)
+            val lat2 = Math.toRadians(point2.latitude)
+            val lon2 = Math.toRadians(point2.longitude)
+
+            val dLat = lat2 - lat1
+            val dLon = lon2 - lon1
+
+            val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1) * Math.cos(lat2) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2)
+
+            val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+
+            return earthRadius * c
+        }
+
         // Observez les changements dans listePanneau
         listePanneau.observe(this, Observer<List<RpaData>> { panneaux ->
-            // Réagissez aux changements dans la liste des panneaux
+            // Effacez tous les marqueurs précédemment affichés
+            googleMap.clear()
+
             for (panneau in panneaux) {
                 val latitude = panneau.Coordonnees.Latitude
                 val longitude = panneau.Coordonnees.Longitude
                 val descriptionRpa = panneau.Description_RPA
                 val resultatVerification = panneau.Resultat_Verification
 
-                // Utilisez les données comme vous le souhaitez
-                // Par exemple, journalisez-les
+                // Calculez la distance entre "Moi" et le panneau actuel
+                val distance = calculateDistance(montreal, LatLng(latitude, longitude))
 
-                // Créez un BitmapDescriptor personnalisé en fonction du résultat de la vérification
-                val customMarkerIcon = if (resultatVerification ==="true") {
+                // Vérifiez si le panneau est à une distance inférieure ou égale à la distance limite
+                if (distance <= distanceLimiteEnMetres) {
+                    // Créez un BitmapDescriptor personnalisé en fonction du résultat de la vérification
+                    val customMarkerIcon = if (resultatVerification == "true") {
+                        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.parking__2_)
+                        val width = 40
+                        val height = 40
+                        val resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false)
+                        BitmapDescriptorFactory.fromBitmap(resizedBitmap)
+                    } else {
+                        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.parking__1_)
+                        val width = 40
+                        val height = 40
+                        val resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false)
+                        BitmapDescriptorFactory.fromBitmap(resizedBitmap)
+                    }
 
-                    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.parking__2_)
-                    val width = 40
-                    val height = 40
-                    val resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false)
-                    BitmapDescriptorFactory.fromBitmap(resizedBitmap)
+                    // Créez un MarkerOptions avec le nouvel icône personnalisé
+                    val markerOptions = MarkerOptions()
+                        .position(LatLng(latitude, longitude))
+                        .icon(customMarkerIcon)
+                        .title(descriptionRpa)
 
-                } else {
-                    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.parking__1_)
-                    val width = 40
-                    val height = 40
-                    val resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false)
-                    BitmapDescriptorFactory.fromBitmap(resizedBitmap)
+                    // Ajoutez le marqueur à la carte
+                    googleMap.addMarker(markerOptions)
                 }
-
-                // Créez un MarkerOptions avec le nouvel icône personnalisé
-                val markerOptions = MarkerOptions()
-                    .position(LatLng(latitude, longitude))
-                    .icon(customMarkerIcon)
-                    .title(descriptionRpa)
-
-                // Ajoutez le marqueur à la carte
-                val marker = googleMap.addMarker(markerOptions)
-
-                // Vous pouvez également stocker ces marqueurs dans une liste si nécessaire
-                // markerList.add(marker)
             }
+            googleMap.addMarker(positionUser)
         })
-
     }
+
 
     // Handle menu item/button clicks here
     fun handleMenuItemClick(view: android.view.View) {
