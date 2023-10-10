@@ -32,6 +32,7 @@ class MenuActivity: AppCompatActivity() {
         val backButton = findViewById<ImageButton>(R.id.back)
         val profileButton = findViewById<Button>(R.id.profilebutton)
         val favorisButton = findViewById<Button>(R.id.favorisbutton)
+        val friendButton = findViewById<Button>(R.id.friendbutton)
 
         //bring page back to main page
         backButton.setOnClickListener {
@@ -50,6 +51,13 @@ class MenuActivity: AppCompatActivity() {
         // bring page to favorites page
         favorisButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
+        // bring page to friends page
+        friendButton.setOnClickListener {
+            val intent = Intent(this, FriendActivity::class.java)
             startActivity(intent)
             finish()
         }
