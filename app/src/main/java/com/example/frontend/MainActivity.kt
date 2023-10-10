@@ -186,14 +186,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         // Liste pour stocker les panneaux proches de Montreal
         val listePanneau = MutableLiveData<List<RpaData>>()
 
-        val width = 40
-        val height = 40
 
-        // Charger l'image depuis les ressources
-        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.parking)
+
 
         // Redimensionner l'image à la taille souhaitée
-        val resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false)
         val zoomButton = findViewById<ImageButton>(R.id.zoom_button)
 
         // Définissez un écouteur de clic pour le bouton
@@ -203,7 +199,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(montreal, 17f))
         }
         // Créer un BitmapDescriptor à partir de l'image redimensionnée
-        val customMarkerIcon = BitmapDescriptorFactory.fromBitmap(resizedBitmap)
         val positionUser = MarkerOptions()
             .position(montreal)
             .icon(BitmapDescriptorFactory.fromResource(R.drawable.la_navigation)) // Replace with your origin icon resource
@@ -222,11 +217,38 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 // Utilisez les données comme vous le souhaitez
                 // Par exemple, journalisez-les
-                Log.d("Panneau", "Latitude: $latitude, Longitude: $longitude")
-                Log.d("Panneau", "Description RPA: $descriptionRpa")
-                Log.d("Panneau", "Résultat de la vérification: $resultatVerification")
+
+                // Créez un BitmapDescriptor personnalisé en fonction du résultat de la vérification
+                val customMarkerIcon = if (resultatVerification ==="true") {
+
+                    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.parking__2_)
+                    val width = 40
+                    val height = 40
+                    val resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false)
+                    BitmapDescriptorFactory.fromBitmap(resizedBitmap)
+
+                } else {
+                    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.parking__1_)
+                    val width = 40
+                    val height = 40
+                    val resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false)
+                    BitmapDescriptorFactory.fromBitmap(resizedBitmap)
+                }
+
+                // Créez un MarkerOptions avec le nouvel icône personnalisé
+                val markerOptions = MarkerOptions()
+                    .position(LatLng(latitude, longitude))
+                    .icon(customMarkerIcon)
+                    .title(descriptionRpa)
+
+                // Ajoutez le marqueur à la carte
+                val marker = googleMap.addMarker(markerOptions)
+
+                // Vous pouvez également stocker ces marqueurs dans une liste si nécessaire
+                // markerList.add(marker)
             }
         })
+
     }
 
     // Handle menu item/button clicks here

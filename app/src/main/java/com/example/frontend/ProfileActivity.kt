@@ -17,7 +17,7 @@ import java.io.IOException
 
 class ProfileActivity : AppCompatActivity() {
 
-    private val url = "http://192.168.5.20/user"
+    private val url = "http://navmtl-543ba0ee6069.herokuapp.com/user"
     private lateinit var AUTH_TOKEN: String
 
     override fun onCreate(savedInstanceState: Bundle?) {

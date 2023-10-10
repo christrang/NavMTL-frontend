@@ -20,7 +20,7 @@ class Repository(val app: Application) {
         app.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
     fun login(mail: String, mdp: String, callback: (Boolean) -> Unit) {
-        val url = "http://192.168.5.20/auth/token"  // Remplacez par votre adresse IP
+        val url = "https://navmtl-543ba0ee6069.herokuapp.com/auth/token"  // Remplacez par votre adresse IP
 
         val json = JSONObject()
         json.put("email", mail)
@@ -63,7 +63,7 @@ class Repository(val app: Application) {
         prenom: String, mail: String, mdp: String, number: String, callback: (Boolean) -> Unit
     ) {
         val url =
-            "http://192.168.5.20/inscription"  // Remplacez par par votre addrese ip
+            "https://navmtl-543ba0ee6069.herokuapp.com/inscription"  // Remplacez par par votre addrese ip
 
         val json = JSONObject()
         json.put("email", mail)
@@ -104,7 +104,7 @@ class Repository(val app: Application) {
         val client = OkHttpClient()
 
         // L'URL de la route Flask
-        val url = "http://192.168.5.20/api/descriptions_rpa_avec_coordonnees"
+        val url = "http://10.90.68.77/api/descriptions_rpa_avec_coordonnees"
 
         // Créez une requête GET
         val request = okhttp3.Request.Builder()
