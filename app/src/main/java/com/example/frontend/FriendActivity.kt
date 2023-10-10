@@ -78,44 +78,61 @@ class FriendActivity : AppCompatActivity() {
             try {
                 val client = OkHttpClient()
                 val request = Request.Builder()
-                    .url("$baseUrl/$query") // Assuming the query is the user ID
+                    .url("$baseUrl/users")
                     .header("Authorization", "Bearer $AUTH_TOKEN")
                     .build()
 
                 val response = client.newCall(request).execute()
-                handleSearchFriendsResponse(response)
+                handleSearchFriendsResponse(response, query)
             } catch (e: IOException) {
                 e.printStackTrace()
             }
         }
     }
 
-    private suspend fun handleSearchFriendsResponse(response: Response) {
+    private suspend fun handleSearchFriendsResponse(response: Response, query: String) {
         val responseData = response.body?.string()
 
         withContext(Dispatchers.Main) {
             if (response.isSuccessful && responseData != null) {
-                val jsonObject = JSONObject(responseData)
+                val jsonArray = JSONArray(responseData)
 
-                // Assuming the API returns user details as JSON
-                val userId = jsonObject.optInt("userID")
-                val userName = jsonObject.optString("userName")
-                val userFullName = jsonObject.optString("fullName")
+                // Iterate through the array to find the user with the matching userID
+                var foundUser: JSONObject? = null
+                for (i in 0 until jsonArray.length()) {
+                    val user = jsonArray.getJSONObject(i)
+                    val userId = user.optString("userID")
 
-                // Update the UI to display the user details
-                val searchResultTextView = findViewById<TextView>(R.id.searchResultTextView)
-                searchResultTextView.text = "User ID: $userId\nUsername: $userName\nFull Name: $userFullName"
+                    // Convert userID to an integer for comparison
+                    if (userId.toIntOrNull() == query.toIntOrNull()) {
+                        foundUser = user
+                        break
+                    }
+                }
+
+                if (foundUser != null) {
+                    // User with matching userID found
+                    val userId = foundUser.optInt("userID")
+                    val email = foundUser.optString("email")
+
+                    // Update the UI to display the user details
+                    val searchResultTextView = findViewById<TextView>(R.id.searchResultTextView)
+                    searchResultTextView.text = "User ID: $userId\nEmail: $email"
+                } else {
+                    // No user with the specified userID found
+                    val searchResultTextView = findViewById<TextView>(R.id.searchResultTextView)
+                    searchResultTextView.text = "User not found"
+                }
             } else {
-                // Handle the error response or no user found
+                // Handle the error response
                 // Example: displayErrorMessage(response.message)
 
-                // Clear the search result TextView if there's an error or no result
+                // Clear the search result TextView if there's an error
                 val searchResultTextView = findViewById<TextView>(R.id.searchResultTextView)
-                searchResultTextView.text = response.message
+                searchResultTextView.text = response.body.toString()
             }
         }
     }
-
 
 
     private fun loadFriendList() {

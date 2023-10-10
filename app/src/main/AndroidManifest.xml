@@ -30,7 +30,7 @@
             android:resource="@array/preloaded_fonts" />
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".MainActivity"
             android:exported="false" />
         <activity
             android:name=".MenuActivity"
@@ -43,7 +43,7 @@
             android:name=".InscriptionActivity"
             android:exported="true"/>
             <activity
-                android:name=".MainActivity"
+                android:name=".LoginActivity"
                 android:exported="true" >
 
             <intent-filter>
