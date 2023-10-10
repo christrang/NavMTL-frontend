@@ -176,8 +176,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
 
-        // Charger l'image depuis les ressources
-
 
         // Redimensionner l'image à la taille souhaitée
         val zoomButton = findViewById<ImageButton>(R.id.zoom_button)
