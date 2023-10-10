@@ -103,6 +103,37 @@
             app:layout_constraintVertical_bias="0.878"
             app:srcCompat="@drawable/favori" />
 
+        <Button
+            android:id="@+id/friendbutton"
+            android:layout_width="300dp"
+            android:layout_height="50dp"
+            android:backgroundTint="@color/black"
+            android:insetLeft="40dp"
+            android:text="Amis"
+            android:textAlignment="textStart"
+            android:textSize="20sp"
+            app:cornerRadius="1dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/favorisbutton"
+            app:layout_constraintVertical_bias="0.106" />
+
+        <ImageView
+            android:id="@+id/imageView7"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:background="#FFFFFF"
+            android:backgroundTint="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="@+id/friendbutton"
+            app:layout_constraintEnd_toEndOf="@+id/friendbutton"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/friendbutton"
+            app:layout_constraintTop_toBottomOf="@+id/favorisbutton"
+            app:layout_constraintVertical_bias="0.878"
+            app:srcCompat="@drawable/favori" />
+
         <ImageButton
             android:id="@+id/back"
             android:layout_width="50dp"

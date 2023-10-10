@@ -104,7 +104,7 @@ class Repository(val app: Application) {
         val client = OkHttpClient()
 
         // L'URL de la route Flask
-        val url = "http://10.90.68.77/api/descriptions_rpa_avec_coordonnees"
+        val url = "https://navmtl-543ba0ee6069.herokuapp.com/panneau"
 
         // Créez une requête GET
         val request = okhttp3.Request.Builder()
