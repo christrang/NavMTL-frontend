@@ -51,11 +51,9 @@
             android:layout_width="300dp"
             android:layout_height="50dp"
             android:backgroundTint="@color/black"
-            android:insetLeft="40dp"
             android:text="Profile"
             android:textAlignment="textStart"
             android:textSize="20sp"
-            app:cornerRadius="1dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.495"
@@ -67,17 +65,12 @@
             android:id="@+id/imageView5"
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:layout_marginTop="9dp"
-            android:layout_marginBottom="9dp"
             android:background="#FFFFFF"
             android:backgroundTint="#FFFFFF"
-            app:layout_constraintBottom_toBottomOf="@+id/profilebutton"
-            app:layout_constraintEnd_toEndOf="@+id/profilebutton"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/profilebutton"
-            app:layout_constraintTop_toTopOf="@+id/profilebutton"
-            app:layout_constraintVertical_bias="0.692"
-            app:srcCompat="@drawable/utilisateur" />
+            app:circularflow_radiusInDP="1dp"
+            app:srcCompat="@drawable/utilisateur"
+            tools:layout_editor_absoluteX="310dp"
+            tools:layout_editor_absoluteY="293dp" />
 
         <Button
             android:id="@+id/favorisbutton"

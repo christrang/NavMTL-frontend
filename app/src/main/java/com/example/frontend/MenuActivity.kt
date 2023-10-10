@@ -18,7 +18,7 @@ import org.json.JSONObject
 import java.io.IOException
 
 class MenuActivity: AppCompatActivity() {
-    private val url = "http://192.168.5.20/user"
+    private val url = "http://navmtl-543ba0ee6069.herokuapp.com/user"
     private lateinit var AUTH_TOKEN: String
 
     @SuppressLint("MissingInflatedId")

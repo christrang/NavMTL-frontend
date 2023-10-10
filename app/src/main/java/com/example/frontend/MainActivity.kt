@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.text.Editable
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -18,9 +19,14 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.google.android.gms.common.api.Status
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import com.google.android.libraries.places.api.Places
@@ -36,7 +42,6 @@ import com.google.maps.DirectionsApi
 import com.google.maps.android.SphericalUtil
 import com.google.maps.model.DirectionsResult
 import com.google.android.gms.maps.model.LatLng
-
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private val fragmentManager: FragmentManager = supportFragmentManager
     private val mapFragment = SupportMapFragment.newInstance()
@@ -49,6 +54,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var autoCompleteFragment: AutocompleteSupportFragment
     private lateinit var editTextAddress: EditText
     private lateinit var googleMap: GoogleMap // Ajout de la référence à GoogleMap
+    private lateinit var rv: RecyclerView
+    private var selectedAddress: String = ""
+    private val historyList: MutableList<History> = mutableListOf()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,8 +121,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG))
         editTextAddress = findViewById(R.id.editTextAddress)
 
+        rv =findViewById(R.id.rvHistory)
+        rv.adapter = HistoryRecycleView(historyList)
+        rv.layoutManager = LinearLayoutManager(this)
+
+
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
+                handlePlaceSelection(place)
                 val montreal = LatLng(45.5017, -73.5673)
                 val selectedLatLng = place.latLng
                 val address = place.address
@@ -170,15 +184,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val distanceLimiteEnMetres = 500.0 // Définissez la distance limite en mètres
 
         // Liste pour stocker les panneaux proches de Montreal
-        val panneauxProches = mutableListOf<Panneau>()
-        val width = 40
-        val height = 40
+        val listePanneau = MutableLiveData<List<RpaData>>()
 
-        // Charger l'image depuis les ressources
-        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.parking)
+
+
 
         // Redimensionner l'image à la taille souhaitée
-        val resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false)
         val zoomButton = findViewById<ImageButton>(R.id.zoom_button)
 
         // Définissez un écouteur de clic pour le bouton
@@ -188,45 +199,56 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(montreal, 17f))
         }
         // Créer un BitmapDescriptor à partir de l'image redimensionnée
-        val customMarkerIcon = BitmapDescriptorFactory.fromBitmap(resizedBitmap)
         val positionUser = MarkerOptions()
             .position(montreal)
             .icon(BitmapDescriptorFactory.fromResource(R.drawable.la_navigation)) // Replace with your origin icon resource
             .title("Moi")
         val positionMarker = googleMap.addMarker(positionUser)
         // Récupérez la liste des panneaux depuis votre API
-        repository.getPanneaux(object : PanneauxCallback {
-            override fun onSuccess(panneaux: MutableList<Panneau>) {
-                // Filtrer les panneaux proches de Montreal
-                for (panneau in panneaux) {
-                    val panneauLocation =
-                        LatLng(panneau.latitude.toDouble(), panneau.longitude.toDouble())
+        repository.main(listePanneau)
+        // Observez les changements dans listePanneau
+        listePanneau.observe(this, Observer<List<RpaData>> { panneaux ->
+            // Réagissez aux changements dans la liste des panneaux
+            for (panneau in panneaux) {
+                val latitude = panneau.Coordonnees.Latitude
+                val longitude = panneau.Coordonnees.Longitude
+                val descriptionRpa = panneau.Description_RPA
+                val resultatVerification = panneau.Resultat_Verification
 
-                    // Calculer la distance entre le panneau et Montreal
-                    val distance = SphericalUtil.computeDistanceBetween(montreal, panneauLocation)
+                // Utilisez les données comme vous le souhaitez
+                // Par exemple, journalisez-les
 
-                    // Vérifier si la distance est inférieure ou égale à la distance limite
-                    if (distance <= distanceLimiteEnMetres) {
-                        // Ajouter le panneau à la liste des panneaux proches
-                        if (panneau.DESCRIPTION_REP != "Enlevé") {
-                            // Ajouter un marqueur pour le desrpa
-                            val desrpaMarker = MarkerOptions()
-                                .position(panneauLocation)
-                                .title("DESRPA: ${panneau.description},${panneau.flechePan}")
-                                .icon(customMarkerIcon)
-                            googleMap.addMarker(desrpaMarker)
+                // Créez un BitmapDescriptor personnalisé en fonction du résultat de la vérification
+                val customMarkerIcon = if (resultatVerification ==="true") {
 
-                    }
-                    }
+                    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.parking__2_)
+                    val width = 40
+                    val height = 40
+                    val resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false)
+                    BitmapDescriptorFactory.fromBitmap(resizedBitmap)
+
+                } else {
+                    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.parking__1_)
+                    val width = 40
+                    val height = 40
+                    val resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false)
+                    BitmapDescriptorFactory.fromBitmap(resizedBitmap)
                 }
 
-            }
+                // Créez un MarkerOptions avec le nouvel icône personnalisé
+                val markerOptions = MarkerOptions()
+                    .position(LatLng(latitude, longitude))
+                    .icon(customMarkerIcon)
+                    .title(descriptionRpa)
 
-            override fun onError(errorMessage: String) {
-                Toast.makeText(this@MainActivity, "Erreur : $errorMessage", Toast.LENGTH_SHORT).show()
-                Log.e("Error Panneaux", errorMessage)
+                // Ajoutez le marqueur à la carte
+                val marker = googleMap.addMarker(markerOptions)
+
+                // Vous pouvez également stocker ces marqueurs dans une liste si nécessaire
+                // markerList.add(marker)
             }
         })
+
     }
 
     // Handle menu item/button clicks here
@@ -243,6 +265,30 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             // Add more cases for other menu items/buttons as needed
         }
     }
+
+    private fun handlePlaceSelection(place: Place) {
+        // Retrieve the selected place's address
+        val address = selectedAddress ?: ""
+
+        // Add the selected address to the history list
+        historyList.add(History(address, place.latLng.toString()))
+
+        // Notify the RecyclerView adapter that the data has changed
+        rv.adapter?.notifyDataSetChanged()
+
+        // Set the selected address to the EditText
+        editTextAddress.text = Editable.Factory.getInstance().newEditable(address)
+
+        val montreal = LatLng(45.5017, -73.5673)
+        val selectedLatLng = place.latLng
+        if (selectedLatLng != null) {
+            getDirections(montreal, selectedLatLng)
+        } else {
+            Log.e("place", montreal.toString())
+            Toast.makeText(applicationContext, "Coordonnées non disponibles", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private val markers: MutableList<Marker> = mutableListOf()
     private var currentPolyline: Polyline? = null
     private fun getDirections(startLatLng: LatLng, endLatLng: LatLng) {

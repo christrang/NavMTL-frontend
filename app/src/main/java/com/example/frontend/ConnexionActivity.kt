@@ -53,7 +53,7 @@ class LoginActivity : AppCompatActivity() {
                     Log.d("LoginActivity", "Connexion réussie")
 
                     // Gérez ici la suite de l'opération après une connexion réussie
-                    val intent = Intent(this, MainActivity::class.java)
+                    val intent = Intent(this, ProfileActivity::class.java)
                     startActivity(intent)
                     finish()
                 } else {
