@@ -16,7 +16,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="-16dp"
+        tools:layout_editor_absoluteY="0dp">
 
         <ImageView
             android:id="@+id/imageView4"
@@ -48,36 +50,37 @@
 
         <Button
             android:id="@+id/profilebutton"
-            android:layout_width="300dp"
-            android:layout_height="50dp"
+            android:layout_width="250dp"
+            android:layout_height="53dp"
             android:backgroundTint="@color/black"
             android:text="Profile"
             android:textAlignment="textStart"
             android:textSize="20sp"
+            app:cornerRadius="1dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintHorizontal_bias="0.496"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.43" />
+            app:layout_constraintVertical_bias="0.452" />
 
         <ImageView
             android:id="@+id/imageView5"
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:background="#FFFFFF"
-            android:backgroundTint="#FFFFFF"
-            app:circularflow_radiusInDP="1dp"
-            app:srcCompat="@drawable/utilisateur"
-            tools:layout_editor_absoluteX="310dp"
-            tools:layout_editor_absoluteY="293dp" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/profilebutton"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.447"
+            app:srcCompat="@drawable/utilisateur" />
 
         <Button
             android:id="@+id/favorisbutton"
-            android:layout_width="300dp"
-            android:layout_height="50dp"
+            android:layout_width="250dp"
+            android:layout_height="53dp"
             android:backgroundTint="@color/black"
-            android:insetLeft="40dp"
             android:text="Favoris"
             android:textAlignment="textStart"
             android:textSize="20sp"
@@ -93,14 +96,12 @@
             android:id="@+id/imageView6"
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:background="#FFFFFF"
-            android:backgroundTint="#FFFFFF"
-            app:layout_constraintBottom_toBottomOf="@+id/favorisbutton"
-            app:layout_constraintEnd_toEndOf="@+id/favorisbutton"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/favorisbutton"
-            app:layout_constraintTop_toBottomOf="@+id/profilebutton"
-            app:layout_constraintVertical_bias="0.878"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/favorisbutton"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.574"
             app:srcCompat="@drawable/favori" />
 
         <Button
@@ -148,6 +149,65 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.052"
             app:srcCompat="@drawable/cross_button" />
+
+        <Button
+            android:id="@+id/login"
+            android:layout_width="125dp"
+            android:layout_height="53dp"
+            android:backgroundTint="@color/black"
+            android:text="Log in"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            app:cornerRadius="1dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/signup"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.895" />
+
+        <Button
+            android:id="@+id/amis"
+            android:layout_width="250dp"
+            android:layout_height="53dp"
+            android:backgroundTint="@color/black"
+            android:text="Amis"
+            android:textAlignment="textStart"
+            android:textSize="20sp"
+            app:cornerRadius="1dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.496"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.697" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/amis"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.689"
+            app:srcCompat="@drawable/amis" />
+
+        <Button
+            android:id="@+id/signup"
+            android:layout_width="125dp"
+            android:layout_height="53dp"
+            android:backgroundTint="@color/black"
+            android:text="Sign up"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            app:cornerRadius="1dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.821"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.895" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
