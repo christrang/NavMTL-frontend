@@ -13,19 +13,21 @@
         android:layout_height="match_parent">
 
         <!-- SupportMapFragment for displaying the map -->
+
+        <!-- Button to open the navigation menu -->
+
         <fragment
             android:id="@+id/map_fragment"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
 
-        <!-- Button to open the navigation menu -->
         <ImageButton
             android:id="@+id/menu_button"
             android:layout_width="52dp"
@@ -40,20 +42,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- ImageButton (you can customize this) -->
         <ImageButton
             android:id="@+id/zoom_button"
-            android:layout_width="56dp"
-            android:layout_height="48dp"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
             android:background="@null"
             android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="@+id/map_fragment"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.954"
+            app:layout_constraintHorizontal_bias="0.953"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/map_fragment"
-            app:layout_constraintVertical_bias="0.023"
-            app:srcCompat="@drawable/rechercher_un_emplacement" />
+            app:srcCompat="@drawable/navigation__1_"
+            tools:layout_editor_absoluteY="16dp" />
+
+        <!-- ImageButton (you can customize this) -->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -110,17 +111,18 @@
             android:id="@+id/bottom_sheet"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:background="@color/grey"
+            android:background="@drawable/inscription_backgroud"
             android:gravity="center_horizontal"
             android:orientation="vertical"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
             <!-- Place Autocomplete Fragment (customize as needed) -->
+
             <Button
                 android:id="@+id/button4"
                 android:layout_width="52dp"
                 android:layout_height="13dp"
-                android:backgroundTint="@color/black"
+                android:backgroundTint="@color/grey"
                 android:clickable="false"
                 android:text="Button" />
 
@@ -133,7 +135,6 @@
                 android:theme="@style/MyAutocompleteFragmentStyle"
                 android:visibility="visible"
                 app:layout_constraintTop_toBottomOf="@+id/textView" />
-
             <EditText
                 android:id="@+id/editTextAddress"
                 android:layout_width="match_parent"
@@ -145,6 +146,7 @@
                 android:focusableInTouchMode="false"
                 android:fontFamily="@font/baloo"
                 android:inputType="none" />
+
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvHistory"
