@@ -78,12 +78,7 @@ class MenuActivity: AppCompatActivity() {
             finish()
         }
 
-        // bring page to friends page
-        friendButton.setOnClickListener {
-            val intent = Intent(this, FriendActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
+
 
         getProfile()
     }
