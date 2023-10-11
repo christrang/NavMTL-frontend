@@ -1,5 +1,12 @@
 # README - Frontend Nav Mtl
 
+## Auteurs
+
+👤 **Marvens Chery** , **Christopher Trang**
+
+- Linkedin: [@marvenschery](https://www.linkedin.com/in/marvenschery/)
+- Github: [@MarvensChery](https://github.com/MarvensChery) , [@christrang](https://github.com/christrang)
+### En cas de question, n'hésitez pas à me contacter❤️.
 
 ## Description
 
