@@ -1,3 +1,5 @@
+
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -24,6 +26,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    buildFeatures {
+        viewBinding = true
+    }
 
     buildTypes {
         release {
@@ -44,17 +49,18 @@ android {
 }
 
 dependencies {
+    implementation("com.mapbox.navigation:android:2.10.1")
+    implementation ("com.mapbox.navigation:ui-dropin:2.10.1")
+
+    implementation ("androidx.room:room-runtime:2.3.0") // Replace with the latest version
+    annotationProcessor ("androidx.room:room-compiler:2.3.0")
     implementation("com.google.android.libraries.places:places:3.2.0")
     implementation("com.squareup.okhttp3:okhttp:4.9.1")
-    implementation ("com.squareup.okhttp3:okhttp:4.9.1")
-    val room_version = "2.5.2"
     implementation ("com.google.maps.android:android-maps-utils:2.2.0")
     implementation ("com.google.maps:google-maps-services:0.17.0")
     implementation ("com.google.android.material:material:1.9.0")
-    kapt("androidx.room:room-compiler:$room_version")
     implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
     implementation("androidx.navigation:navigation-ui-ktx:2.3.5")
-    implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
