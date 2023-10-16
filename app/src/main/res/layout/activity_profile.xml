@@ -142,7 +142,7 @@
                                         tools:ignore="DuplicateIds" />
 
                                     <TextView
-                                        android:id="@+id/textView"
+                                        android:id="@+id/textView36"
                                         android:layout_width="118dp"
                                         android:layout_height="30dp"
                                         android:layout_weight="1"

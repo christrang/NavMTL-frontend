@@ -341,6 +341,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
             polylineOptions.width(20f)
+            polylineOptions.color(0xffffffff.toInt())
 
             // Supprimer l'ancienne polyline s'il y en a une
             currentPolyline?.remove()
