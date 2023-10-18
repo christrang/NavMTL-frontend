@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="50dp"
+    android:height="50dp"
+    android:viewportHeight="75.0"
+    android:viewportWidth="75.0">
+
+    <!-- Foreground Circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M37.5,37.5m-22.5,0a22.5,22.5 0,1 1,45 0a22.5,22.5 0,1 1,-45 0" />
+    <!-- Top Bar of Hamburger Icon -->
+    <path
+        android:fillColor="#4A90E2"
+        android:pathData="M25,34 L50,34 L50,36.5 L25,36.5 Z" />
+    <!-- Middle Bar of Hamburger Icon -->
+    <path
+        android:fillColor="#4A90E2"
+        android:pathData="M25,38.5 L50,38.5 L50,41 L25,41 Z" />
+    <!-- Bottom Bar of Hamburger Icon -->
+    <path
+        android:fillColor="#4A90E2"
+        android:pathData="M25,43 L50,43 L50,45.5 L25,45.5 Z" />
+</vector>
