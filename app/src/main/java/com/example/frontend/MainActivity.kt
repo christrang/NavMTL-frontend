@@ -87,14 +87,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
-        bottomSheet = findViewById(R.id.bottom_sheet)
         initialHeight = resources.getDimensionPixelSize(R.dimen.initial_height) // Remplacez R.dimen.initial_height par la ressource appropriée
 
         bottomSheet.setOnTouchListener { _, event ->
             handleTouch(event)
             true
         }
-        bottomSheet = findViewById(R.id.bottom_sheet)
         initialHeight = resources.getDimensionPixelSize(R.dimen.initial_height)
 
         // Récupérer le token depuis SharedPreferences
@@ -108,46 +106,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
         replaceFragment(mapFragment)
 
-        Places.initialize(applicationContext, "AIzaSyAUcUujvbKP4jVrmo3I00MNI8pdar4Ag0g") // Remplacez par votre clé API Google Maps
-        val placesClient = Places.createClient(this)
-        val autocompleteFragment = supportFragmentManager.findFragmentById(R.id.place_autocomplete_fragment)
-                as AutocompleteSupportFragment
 
-        // Specify location bias for autocomplete
-        val montrealLatLngBounds = LatLngBounds(LatLng(45.4215, -73.5696), LatLng(45.6983, -73.4828))
-        autocompleteFragment.setLocationBias(RectangularBounds.newInstance(montrealLatLngBounds))
-
-        // Specify the types of place data to return (in this case, just addresses)
-        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG))
-        editTextAddress = findViewById(R.id.editTextAddress)
-
-        rv =findViewById(R.id.rvHistory)
-        rv.adapter = HistoryRecycleView(historyList)
-        rv.layoutManager = LinearLayoutManager(this)
-
-
-        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
-            override fun onPlaceSelected(place: Place) {
-                handlePlaceSelection(place)
-                val montreal = LatLng(45.5017, -73.5673)
-                val selectedLatLng = place.latLng
-                val address = place.address
-                Log.e("place", place.toString())
-                if (selectedLatLng != null) {
-                    // Utilisez selectedLatLng pour obtenir les coordonnées (latitude et longitude)
-                    getDirections(montreal, selectedLatLng)
-                } else {
-                    // La position sélectionnée n'a pas de coordonnées valides
-                    Log.e("place", montreal.toString())
-                    Toast.makeText(applicationContext, "Coordonnées non disponibles", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onError(status: com.google.android.gms.common.api.Status) {
-                val errorMessage = status.statusMessage
-                Toast.makeText(applicationContext, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
-            }
-        })
         val menuButton = findViewById<ImageButton>(R.id.menu_button)
         menuButton.setOnClickListener {
             val intent = Intent(this, MenuActivity::class.java)
@@ -155,10 +114,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             finish()
         }
 
-        val bottomSheetView = findViewById<LinearLayout>(R.id.bottom_sheet)
-        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView)
-        bottomSheetBehavior.isHideable = false
-        bottomSheetBehavior.peekHeight = 200
     }
 
     private fun replaceFragment(fragment: Fragment) {

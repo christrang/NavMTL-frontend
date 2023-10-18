@@ -1,11 +1,20 @@
 package com.example.frontend
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
+import android.Manifest
+import android.app.Activity
+import android.content.ContentValues.TAG
 import android.view.View
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -42,8 +51,21 @@ import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
-import com.example.frontend.R
 import com.example.frontend.databinding.ActivityNavigationViewBinding
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.AutocompleteActivity
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment.*
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
@@ -73,6 +95,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
+import java.util.Arrays
 import java.util.Date
 import java.util.Locale
 
@@ -106,12 +129,16 @@ class NavigationViewActivity : AppCompatActivity() {
 
     private companion object {
         private const val BUTTON_ANIMATION_DURATION = 1500L
+        const val REQUEST_CODE_LOCATION = 1001
+        private const val AUTOCOMPLETE_REQUEST_CODE = 12345
     }
-
+    private lateinit var menuButton: ImageButton
+    private lateinit var autoCompleteFragment: AutocompleteSupportFragment
     /**
      * Debug tool used to play, pause and seek route progress events that can be used to produce mocked location updates along the route.
      */
     private val mapboxReplayer = MapboxReplayer()
+
 
     /**
      * Debug tool that mocks location updates with an input from the [mapboxReplayer].
@@ -222,6 +249,7 @@ class NavigationViewActivity : AppCompatActivity() {
                 voiceInstructionsPlayer.volume(SpeechVolume(1f))
             }
         }
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     /**
      * Extracts message that should be communicated to the driver about the upcoming maneuver.
@@ -303,10 +331,11 @@ class NavigationViewActivity : AppCompatActivity() {
             val enhancedLocation = locationMatcherResult.enhancedLocation
             // update location puck's position on the map
             navigationLocationProvider.changePosition(
+
                 location = enhancedLocation,
                 keyPoints = locationMatcherResult.keyPoints,
             )
-
+            Log.e("location", enhancedLocation.toString())
             // update camera position to account for new location
             viewportDataSource.onLocationChanged(enhancedLocation)
             viewportDataSource.evaluate()
@@ -429,10 +458,29 @@ class NavigationViewActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_navigation_view)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         binding = ActivityNavigationViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        val southwestMontreal = LatLng(45.4104, -73.9794)
+        val northeastMontreal = LatLng(45.7056, -73.4754)
+        val montrealBounds = RectangularBounds.newInstance(southwestMontreal, northeastMontreal)
 
+        Places.initialize(applicationContext, "AIzaSyAUcUujvbKP4jVrmo3I00MNI8pdar4Ag0g")
+        binding.placeAutocompleteButton.setOnClickListener {
+            val intent = Autocomplete.IntentBuilder(
+                AutocompleteActivityMode.FULLSCREEN,
+                Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
+            )
+                .setLocationBias(montrealBounds)
+                .build(this)
+            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE)
+        }
+
+        menuButton = findViewById(R.id.menu_button)
         // initialize Navigation Camera
         viewportDataSource = MapboxNavigationViewportDataSource(binding.mapView.getMapboxMap())
         navigationCamera = NavigationCamera(
@@ -466,6 +514,12 @@ class NavigationViewActivity : AppCompatActivity() {
         } else {
             viewportDataSource.followingPadding = followingPadding
         }
+        val menuButton = findViewById<ImageButton>(R.id.menu_button)
+        menuButton.setOnClickListener {
+            val intent = Intent(this, MenuActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
 
         // make sure to use the same DistanceFormatterOptions across different features
         val distanceFormatterOptions = DistanceFormatterOptions.Builder(this).build()
@@ -497,12 +551,12 @@ class NavigationViewActivity : AppCompatActivity() {
         speechApi = MapboxSpeechApi(
             this,
             getString(R.string.mapbox_access_token),
-            Locale.US.language
+            Locale.UK.language
         )
         voiceInstructionsPlayer = MapboxVoiceInstructionsPlayer(
             this,
             getString(R.string.mapbox_access_token),
-            Locale.US.language
+            Locale.UK.language
         )
 
         // initialize route line, the withRouteLineBelowLayerId is specified to place
@@ -547,7 +601,35 @@ class NavigationViewActivity : AppCompatActivity() {
 
         // set initial sounds button state
         binding.soundButton.unmute()
+
     }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val bottomSheetLinearLayout: LinearLayout = findViewById(R.id.bottom_sheet)
+        val bottomSheetBehavior: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior.from(bottomSheetLinearLayout)
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+            when (resultCode) {
+                Activity.RESULT_OK -> {
+                    val place = Autocomplete.getPlaceFromIntent(data!!)
+                    val latLng = place.latLng
+                    val latitude = latLng.latitude
+                    val longitude = latLng.longitude
+                    val test = Point.fromLngLat(longitude, latitude)
+                    bottomSheetBehavior.maxHeight = 0
+                    findRoute(test)
+                    Log.i(TAG, "Place: ${place.name}, Latitude: $latitude, Longitude: $longitude")
+                }
+                AutocompleteActivity.RESULT_ERROR -> {
+                    val status = Autocomplete.getStatusFromIntent(data!!)
+                    status.statusMessage?.let { Log.i(TAG, it) }
+                }
+                Activity.RESULT_CANCELED -> {
+                    // Handle the result when user cancelled operation
+                }
+            }
+        }
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -574,26 +656,44 @@ class NavigationViewActivity : AppCompatActivity() {
             this.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
                     this@NavigationViewActivity,
-                    R.drawable.spotify
+                    R.drawable.navigationicon
                 )
             )
             enabled = true
         }
-
+        Log.e("location", "ici")
         replayOriginLocation()
     }
 
     private fun replayOriginLocation() {
-        mapboxReplayer.pushEvents(
-            listOf(
-                ReplayRouteMapper.mapToUpdateLocation(
-                    Date().time.toDouble(),
-                    Point.fromLngLat(-122.39726512303575, 37.785128345296805)
-                )
-            )
-        )
-        mapboxReplayer.playFirstLocation()
-        mapboxReplayer.playbackSpeed(3.0)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED) {
+
+            Log.e("location", "ici")
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                location?.let {
+                    Log.e("location", it.longitude.toString())
+                    val currentPoint = Point.fromLngLat(it.longitude, it.latitude)
+                    Log.e("location", currentPoint.toString())
+
+                    mapboxReplayer.pushEvents(
+                        listOf(
+                            ReplayRouteMapper.mapToUpdateLocation(
+                                Date().time.toDouble(),
+                                currentPoint
+                            )
+                        )
+                    )
+                    mapboxReplayer.playFirstLocation()
+                    mapboxReplayer.playbackSpeed(3.0)
+                }
+            }
+        } else {
+
+            REQUEST_CODE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION
+            Log.e("location", "no permission")
+        }
     }
 
     private fun findRoute(destination: Point) {
@@ -601,7 +701,7 @@ class NavigationViewActivity : AppCompatActivity() {
         val originPoint = originLocation?.let {
             Point.fromLngLat(it.longitude, it.latitude)
         } ?: return
-
+            Log.e("destion", destination.toString())
         // execute a route request
         // it's recommended to use the
         // applyDefaultNavigationOptions and applyLanguageAndVoiceUnitOptions
@@ -653,7 +753,6 @@ class NavigationViewActivity : AppCompatActivity() {
         binding.soundButton.visibility = View.VISIBLE
         binding.routeOverview.visibility = View.VISIBLE
         binding.tripProgressCard.visibility = View.VISIBLE
-
         // move the camera to overview when new route is available
         navigationCamera.requestNavigationCameraToOverview()
     }

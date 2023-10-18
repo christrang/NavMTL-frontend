@@ -1,15 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
+    <!-- Bottom Sheet -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <com.mapbox.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" >
+
+
+    </com.mapbox.maps.MapView>
+    <ImageButton
+        android:id="@+id/menu_button"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#00FFFFFF"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:src="@drawable/hamburgermenu"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -19,7 +38,7 @@
         android:layout_height="wrap_content"
         android:visibility="invisible"
         app:cardElevation="8dp"
-        app:cardUseCompatPadding="false"    
+        app:cardUseCompatPadding="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -35,7 +54,7 @@
             android:layout_height="48dp"
             android:layout_gravity="end|center_vertical"
             android:layout_marginEnd="12dp"
-            app:srcCompat="@android:drawable/ic_delete" />
+            app:srcCompat="@drawable/cross_button_white" />
     </androidx.cardview.widget.CardView>
 
     <com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
@@ -76,5 +95,57 @@
         android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/routeOverview" />
+ </androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Before Navigation Bottom Sheet -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <LinearLayout
+            android:id="@+id/bottom_sheet"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="@drawable/inscription_backgroud"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+            <!-- Place Autocomplete Fragment (customize as needed) -->
+
+            <Button
+                android:id="@+id/button4"
+                android:layout_width="52dp"
+                android:layout_height="13dp"
+                android:backgroundTint="@color/grey"
+                android:clickable="false"
+                android:text="Button" />
+
+            <Button
+                android:id="@+id/placeAutocompleteButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Search Place" />
+            <EditText
+                android:id="@+id/editTextAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="auto"
+                android:focusableInTouchMode="false"
+                android:fontFamily="@font/baloo"
+                android:inputType="none" />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvHistory"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <!-- Add more menu items or content as needed -->
+
+        </LinearLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
