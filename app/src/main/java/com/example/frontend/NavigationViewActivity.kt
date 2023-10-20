@@ -11,13 +11,22 @@ import android.util.Log
 import android.Manifest
 import android.app.Activity
 import android.content.ContentValues.TAG
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.support.annotation.DrawableRes
 import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -66,6 +75,9 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment.*
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
@@ -82,6 +94,9 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi
+import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter
+import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
 import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
@@ -165,6 +180,25 @@ class NavigationViewActivity : AppCompatActivity() {
      * Produces the camera frames based on the location and routing data for the [navigationCamera] to execute.
      */
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
+
+
+    /**
+     * The data in the [MapboxSpeedLimitView] is formatted by different formatting implementations.
+     * Below is the default formatter using default options but you can use your own formatting
+     * classes.
+     */
+    private val speedLimitFormatter: SpeedLimitFormatter by lazy {
+        SpeedLimitFormatter(this)
+    }
+
+    /**
+     * API used for formatting speed limit related data.
+     */
+    private val speedLimitApi: MapboxSpeedLimitApi by lazy {
+        MapboxSpeedLimitApi(speedLimitFormatter)
+    }
+
+
 
     /*
      * Below are generated camera padding values to ensure that the route fits well on screen while
@@ -462,9 +496,62 @@ class NavigationViewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_navigation_view)
 
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         binding = ActivityNavigationViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        // Récupérez la liste des panneaux depuis votre API
+        val repository = Repository(application)
+
+        fun convertDrawableToBitmap(sourceDrawable: Drawable?): Bitmap? {
+            if (sourceDrawable == null) {
+                return null
+            }
+            if (sourceDrawable is BitmapDrawable) {
+                val bitmapConfig = sourceDrawable.bitmap.config
+                if (bitmapConfig == Bitmap.Config.ARGB_8888) {
+                    return sourceDrawable.bitmap
+                }
+            }
+            // Regardless of the original config of sourceDrawable, we ensure the resulting bitmap has ARGB_8888 config
+            val bitmap: Bitmap = Bitmap.createBitmap(
+                sourceDrawable.intrinsicWidth, sourceDrawable.intrinsicHeight,
+                Bitmap.Config.ARGB_8888
+            )
+            val canvas = Canvas(bitmap)
+            sourceDrawable.setBounds(0, 0, canvas.width, canvas.height)
+            sourceDrawable.draw(canvas)
+            return bitmap
+        }
+
+         fun bitmapFromDrawableRes(context: Context, @DrawableRes resourceId: Int) =
+            convertDrawableToBitmap(AppCompatResources.getDrawable(context, resourceId))
+
+         fun addAnnotationToMap(latitude: Double, longitude: Double) {
+             bitmapFromDrawableRes(
+                 this@NavigationViewActivity,
+                 R.drawable.parking__2_
+             )?.let {
+                 val annotationApi = binding.mapView.annotations
+                 val pointAnnotationManager =
+                     annotationApi?.createPointAnnotationManager(binding.mapView!!)
+                 val pointAnnotationOptions: PointAnnotationOptions = PointAnnotationOptions()
+                     .withPoint(Point.fromLngLat(longitude, latitude))
+                     .withIconImage(it)
+                 pointAnnotationManager?.create(pointAnnotationOptions)
+             }
+         }
+        val listePanneau = MutableLiveData<List<RpaData>>()
+        repository.main(listePanneau)
+        listePanneau.observe(this@NavigationViewActivity) { panneauxList ->
+            panneauxList.forEach { rpaData ->
+                addAnnotationToMap(
+                    rpaData.Coordonnees.Latitude,
+                    rpaData.Coordonnees.Longitude
+                )
+            }
+        }
+
         val southwestMontreal = LatLng(45.4104, -73.9794)
         val northeastMontreal = LatLng(45.7056, -73.4754)
         val montrealBounds = RectangularBounds.newInstance(southwestMontreal, northeastMontreal)
@@ -472,7 +559,7 @@ class NavigationViewActivity : AppCompatActivity() {
         Places.initialize(applicationContext, "AIzaSyAUcUujvbKP4jVrmo3I00MNI8pdar4Ag0g")
         binding.placeAutocompleteButton.setOnClickListener {
             val intent = Autocomplete.IntentBuilder(
-                AutocompleteActivityMode.FULLSCREEN,
+                AutocompleteActivityMode.OVERLAY,
                 Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
             )
                 .setLocationBias(montrealBounds)
@@ -542,7 +629,7 @@ class NavigationViewActivity : AppCompatActivity() {
                     PercentDistanceTraveledFormatter()
                 )
                 .estimatedTimeToArrivalFormatter(
-                    EstimatedTimeToArrivalFormatter(this, TimeFormat.NONE_SPECIFIED)
+                    EstimatedTimeToArrivalFormatter(this, TimeFormat.TWENTY_FOUR_HOURS)
                 )
                 .build()
         )
@@ -574,7 +661,7 @@ class NavigationViewActivity : AppCompatActivity() {
         routeArrowView = MapboxRouteArrowView(routeArrowOptions)
 
         // load map style
-        binding.mapView.getMapboxMap().loadStyleUri(NavigationStyles.NAVIGATION_DAY_STYLE) {
+        binding.mapView.getMapboxMap().loadStyleUri(NavigationStyles.NAVIGATION_NIGHT_STYLE) {
             // add long click listener that search for a route to the clicked destination
             binding.mapView.gestures.addOnMapLongClickListener { point ->
                 findRoute(point)
@@ -585,6 +672,9 @@ class NavigationViewActivity : AppCompatActivity() {
         // initialize view interactions
         binding.stop.setOnClickListener {
             clearRouteAndStopNavigation()
+            val bottomSheetLinearLayout: LinearLayout = findViewById(R.id.bottom_sheet)
+            val bottomSheetBehavior: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior.from(bottomSheetLinearLayout)
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
         binding.recenter.setOnClickListener {
             navigationCamera.requestNavigationCameraToFollowing()
@@ -601,12 +691,48 @@ class NavigationViewActivity : AppCompatActivity() {
 
         // set initial sounds button state
         binding.soundButton.unmute()
+        val bottomSheetLayout: LinearLayout = findViewById(R.id.bottom_sheet)
+        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
+        //bottomSheetBehavior.peekHeight = 500
+        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                when (newState) {
+                    BottomSheetBehavior.STATE_DRAGGING -> {
+                        bottomSheetBehavior.peekHeight = 500
+                    }
+                    BottomSheetBehavior.STATE_SETTLING -> {
+                        // Handle the settling state
+                    }
+                    BottomSheetBehavior.STATE_EXPANDED -> {
+                        // Handle the expanded state
+                    }
+                    BottomSheetBehavior.STATE_COLLAPSED -> {
+                        // Handle the collapsed state
+                    }
+                    BottomSheetBehavior.STATE_HIDDEN -> {
+                        // Handle the hidden state
+                    }
+                    else -> {
+                        // Handle the default state
+                    }
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                // Handle the sliding state
+            }
+        })
+
 
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         val bottomSheetLinearLayout: LinearLayout = findViewById(R.id.bottom_sheet)
         val bottomSheetBehavior: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior.from(bottomSheetLinearLayout)
+        bottomSheetBehavior.peekHeight = 0
+        bottomSheetBehavior.isDraggable=true
+        bottomSheetBehavior.isHideable=false
+
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
             when (resultCode) {
                 Activity.RESULT_OK -> {
@@ -615,7 +741,7 @@ class NavigationViewActivity : AppCompatActivity() {
                     val latitude = latLng.latitude
                     val longitude = latLng.longitude
                     val test = Point.fromLngLat(longitude, latitude)
-                    bottomSheetBehavior.maxHeight = 0
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                     findRoute(test)
                     Log.i(TAG, "Place: ${place.name}, Latitude: $latitude, Longitude: $longitude")
                 }
@@ -624,6 +750,9 @@ class NavigationViewActivity : AppCompatActivity() {
                     status.statusMessage?.let { Log.i(TAG, it) }
                 }
                 Activity.RESULT_CANCELED -> {
+                    bottomSheetBehavior.peekHeight = 0
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+
                     // Handle the result when user cancelled operation
                 }
             }
@@ -639,9 +768,13 @@ class NavigationViewActivity : AppCompatActivity() {
         routeLineView.cancel()
         speechApi.cancel()
         voiceInstructionsPlayer.shutdown()
+
     }
 
     private fun initNavigation() {
+        val bottomSheetLinearLayout: LinearLayout = findViewById(R.id.bottom_sheet)
+        val bottomSheetBehavior: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior.from(bottomSheetLinearLayout)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         MapboxNavigationApp.setup(
             NavigationOptions.Builder(this)
                 .accessToken(getString(R.string.mapbox_access_token))
@@ -697,6 +830,8 @@ class NavigationViewActivity : AppCompatActivity() {
     }
 
     private fun findRoute(destination: Point) {
+
+
         val originLocation = navigationLocationProvider.lastLocation
         val originPoint = originLocation?.let {
             Point.fromLngLat(it.longitude, it.latitude)

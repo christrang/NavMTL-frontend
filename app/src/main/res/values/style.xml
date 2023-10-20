@@ -10,4 +10,9 @@
         <item name="android:textSize">16sp</item>
         <!-- Autres attributs de personnalisation -->
     </style>
+    <style name="MapboxCustomTripProgressStyle" >
+        <item name="tripProgressTextColor">#7B3CEA</item>
+        <item name="tripProgressViewBackgroundColor">#EEEEEE</item>
+        <item name="android:fontFamily">@font/baloo</item>
+    </style>
 </resources>
