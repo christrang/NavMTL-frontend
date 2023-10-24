@@ -110,6 +110,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
+import java.text.SimpleDateFormat
 import java.util.Arrays
 import java.util.Date
 import java.util.Locale
@@ -390,8 +391,36 @@ class NavigationViewActivity : AppCompatActivity() {
     /**
      * Gets notified with progress along the currently active route.
      */
+    fun formatTime(totalSeconds: Long): String {
+        val hours = totalSeconds / 3600
+        val minutes = (totalSeconds % 3600) / 60
+
+        return if (hours > 0) {
+            String.format("%02d:%02d", hours, minutes)
+        } else {
+            String.format("%02d min", minutes)
+        }
+    }
+
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         // update the camera position to account for the progressed fragment of the route
+        val tripProgress = tripProgressApi.getTripProgress(routeProgress)
+        val totalTimeRemainingFormatted = formatTime(tripProgress.totalTimeRemaining.toLong())
+        binding.tempsRestant.text = totalTimeRemainingFormatted
+
+        // Format and set the distance remaining
+        val distanceRemainingKm = tripProgress.distanceRemaining / 1000
+        val distanceText = String.format("%.2f km", distanceRemainingKm)
+        binding.distanceREstante.text = distanceText
+
+        // Format and set the estimated time to arrival
+        val estimatedArrivalTime = Date(tripProgress.estimatedTimeToArrival)
+        val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val formattedTime = dateFormat.format(estimatedArrivalTime)
+        binding.tempsEstime.text = formattedTime
+
+
+        binding.tripProgressView.render(tripProgress)
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
 
@@ -661,7 +690,7 @@ class NavigationViewActivity : AppCompatActivity() {
         routeArrowView = MapboxRouteArrowView(routeArrowOptions)
 
         // load map style
-        binding.mapView.getMapboxMap().loadStyleUri(NavigationStyles.NAVIGATION_NIGHT_STYLE) {
+        binding.mapView.getMapboxMap().loadStyleUri("mapbox://styles/marvenschery/clnzg3ia300aa01qs6spv0mt7") {
             // add long click listener that search for a route to the clicked destination
             binding.mapView.gestures.addOnMapLongClickListener { point ->
                 findRoute(point)
@@ -805,9 +834,8 @@ class NavigationViewActivity : AppCompatActivity() {
             Log.e("location", "ici")
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                 location?.let {
-                    Log.e("location", it.longitude.toString())
+
                     val currentPoint = Point.fromLngLat(it.longitude, it.latitude)
-                    Log.e("location", currentPoint.toString())
 
                     mapboxReplayer.pushEvents(
                         listOf(
@@ -836,7 +864,7 @@ class NavigationViewActivity : AppCompatActivity() {
         val originPoint = originLocation?.let {
             Point.fromLngLat(it.longitude, it.latitude)
         } ?: return
-            Log.e("destion", destination.toString())
+            Log.e("destination", destination.toString())
         // execute a route request
         // it's recommended to use the
         // applyDefaultNavigationOptions and applyLanguageAndVoiceUnitOptions

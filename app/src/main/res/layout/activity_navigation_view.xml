@@ -21,6 +21,10 @@
             app:layout_constraintTop_toTopOf="parent">
 
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvHistory"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
         </com.mapbox.maps.MapView>
 
         <ImageButton
@@ -30,41 +34,108 @@
             android:layout_centerInParent="true"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:backgroundTint="#00FFFFFF"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:src="@drawable/hamburgermenu"
+            android:src="@drawable/hamburger_menu_svgrepo_com__1_"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/tripProgressCard"
             android:layout_width="416dp"
-            android:layout_height="95dp"
-            android:visibility="invisible"
-            app:cardElevation="8dp"
-            app:cardUseCompatPadding="false"
+            android:layout_height="wrap_content"
             android:fontFamily="@font/baloo"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="#000000"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:shapeAppearanceOverlay="@style/RoundedTopCorners"
+            >
 
-            <com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
-                android:id="@+id/tripProgressView"
-                android:layout_width="414dp"
-                android:layout_height="match_parent"
-                android:fontFamily="@font/baloo"
-                app:tripProgressTextColor="#C0CA33"
-                app:tripProgressViewBackgroundColor="#00ACC1" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp">
 
-            <ImageView
-                android:id="@+id/stop"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="end|center_vertical"
-                android:layout_marginEnd="12dp"
-                app:srcCompat="@drawable/close_svgrepo_com__2_" />
+                <TextView
+                    android:id="@+id/tempsEstime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/baloo"
+                    android:text="12:45"
+                    android:textAlignment="center"
+                    android:textColor="#FFFFFF"
+                    android:textSize="34sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <LinearLayout
+                    android:id="@+id/linearLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layout_constraintTop_toBottomOf="@+id/tempsEstime"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/tempsRestant"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:fontFamily="@font/baloo"
+                        android:text="15 min"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:id="@+id/distanceREstante"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:fontFamily="@font/baloo"
+                        android:text="2.5 km"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp" />
+                </LinearLayout>
+
+                <com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
+                    android:id="@+id/tripProgressView"
+                    android:layout_width="0dp"
+                    android:layout_height="4dp"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
+                <ImageView
+                    android:id="@+id/stop"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="28dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/close_svgrepo_com__2_" />
+
+                <ImageButton
+                    android:id="@+id/Lookup"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="28dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/loupe_search_svgrepo_com" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
+
+
+
 
         <com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
             android:id="@+id/maneuverView"
@@ -114,7 +185,7 @@
             android:id="@+id/bottom_sheet"
             android:layout_width="match_parent"
             android:layout_height="399dp"
-            android:background="@drawable/inscription_backgroud"
+            android:background="@drawable/bottomfrag"
             android:gravity="center_horizontal"
             android:orientation="vertical"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
@@ -131,18 +202,23 @@
 
             <Button
                 android:id="@+id/placeAutocompleteButton"
-                android:layout_width="match_parent"
+                android:layout_width="349dp"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#787878"
+                android:backgroundTint="#676767"
                 android:fontFamily="@font/baloo"
-                android:text="Où va-t-on?"
-                app:icon="@drawable/loupe" />
-
+                android:hint="Où va-t-on?"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                app:icon="@drawable/loupe"
+                app:iconSize="28dp"
+                app:iconTint="#515151" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvHistory"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:id="@+id/rvFavoris"
+                android:layout_width="411dp"
+                android:layout_height="127dp" />
+
+
             <!-- Add more menu items or content as needed -->
 
         </LinearLayout>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Style personnalisé pour le fragment AutocompleteSupportFragment -->
-    <style name="MyAutocompleteFragmentStyle">
+    <style name="MyAutocompleteFragmentStyle" >
         <!-- Personnalisation des couleurs -->
         <item name="android:background">#FFFFFF</item>
         <item name="android:textColor">@color/white</item>
@@ -10,9 +10,17 @@
         <item name="android:textSize">16sp</item>
         <!-- Autres attributs de personnalisation -->
     </style>
-    <style name="MapboxCustomTripProgressStyle" >
-        <item name="tripProgressTextColor">#7B3CEA</item>
-        <item name="tripProgressViewBackgroundColor">#EEEEEE</item>
-        <item name="android:fontFamily">@font/baloo</item>
+    <style name="MapboxCustomTripProgressStyle" parent="MapboxStyleTripProgressView">
+        <item name="tripProgressViewBackgroundColor">@color/colorSurface</item>
+        <item name="timeRemainingTextAppearance">@style/DropInStyleTimeRemaining</item>
+        <item name="distanceRemainingTextAppearance">@style/DropInStyleDistanceRemaining</item>
+        <item name="distanceRemainingIcon">@drawable/amis</item>
+        <item name="estimatedArrivalTimeTextAppearance">@style/DropInStyleEstimatedArrivalTime</item>
+        <item name="estimatedArrivalTimeIcon">@drawable/hamburger</item>
     </style>
+    <style name="RoundedTopCorners">
+        <item name="cornerSizeTopLeft">10dp</item>
+        <item name="cornerSizeTopRight">10dp</item>
+    </style>
+
 </resources>
