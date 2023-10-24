@@ -18,7 +18,6 @@
 
         <fragment
             android:id="@+id/map_fragment"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -103,59 +102,6 @@
     </LinearLayout>
 
     <!-- Bottom Sheet -->
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id="@+id/bottom_sheet"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="@drawable/inscription_backgroud"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
-
-            <!-- Place Autocomplete Fragment (customize as needed) -->
-
-            <Button
-                android:id="@+id/button4"
-                android:layout_width="52dp"
-                android:layout_height="13dp"
-                android:backgroundTint="@color/grey"
-                android:clickable="false"
-                android:text="Button" />
-
-            <fragment
-                android:id="@+id/place_autocomplete_fragment"
-                android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                android:theme="@style/MyAutocompleteFragmentStyle"
-                android:visibility="visible"
-                app:layout_constraintTop_toBottomOf="@+id/textView" />
-            <EditText
-                android:id="@+id/editTextAddress"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="auto"
-                android:focusableInTouchMode="false"
-                android:fontFamily="@font/baloo"
-                android:inputType="none" />
-
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvHistory"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-            <!-- Add more menu items or content as needed -->
-
-        </LinearLayout>
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </androidx.drawerlayout.widget.DrawerLayout>
