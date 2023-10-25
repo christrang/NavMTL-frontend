@@ -20,11 +20,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvHistory"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
         </com.mapbox.maps.MapView>
 
         <ImageButton
@@ -87,7 +82,7 @@
                         android:layout_marginEnd="16dp"
                         android:fontFamily="@font/baloo"
                         android:text="15 min"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/grey"
                         android:textSize="20sp" />
 
                     <TextView
@@ -97,7 +92,7 @@
                         android:layout_marginStart="16dp"
                         android:fontFamily="@font/baloo"
                         android:text="2.5 km"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/grey"
                         android:textSize="20sp" />
                 </LinearLayout>
 
@@ -132,9 +127,8 @@
                     app:srcCompat="@drawable/loupe_search_svgrepo_com" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
         </androidx.cardview.widget.CardView>
-
-
 
 
         <com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
@@ -165,7 +159,9 @@
             android:layout_marginEnd="16dp"
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/soundButton" />
+            app:layout_constraintTop_toBottomOf="@id/soundButton" >
+
+        </com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButton>
 
         <com.mapbox.navigation.ui.maps.camera.view.MapboxRecenterButton
             android:id="@+id/recenter"
@@ -177,9 +173,7 @@
             app:layout_constraintTop_toBottomOf="@id/routeOverview" />
     </androidx.constraintlayout.widget.ConstraintLayout>
     <!-- Before Navigation Bottom Sheet -->
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+
 
         <LinearLayout
             android:id="@+id/bottom_sheet"
@@ -225,4 +219,3 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
