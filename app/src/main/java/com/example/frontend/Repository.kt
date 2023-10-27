@@ -14,10 +14,16 @@ import okhttp3.OkHttpClient
 import org.json.JSONObject
 import android.os.Handler
 import android.os.Looper
+import com.android.volley.toolbox.StringRequest
+import dagger.Reusable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 class Repository(val app: Application) {
     private val queue = Volley.newRequestQueue(app)
     private val sharedPrefs: SharedPreferences =
         app.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+    private lateinit var AUTH_TOKEN: String
 
     fun login(mail: String, mdp: String, callback: (Boolean) -> Unit) {
         val url = "https://navmtl-543ba0ee6069.herokuapp.com/auth/token"  // Remplacez par votre adresse IP
@@ -56,6 +62,12 @@ class Repository(val app: Application) {
         queue.add(request)
     }
 
+    // Function to log out and remove the token from SharedPreferences
+    fun logout() {
+        val editor = sharedPrefs.edit()
+        editor.remove("token")
+        editor.apply()
+    }
 
     /// Inscription
     fun inscription(
@@ -138,4 +150,41 @@ class Repository(val app: Application) {
         }.start()
     }
 
+    fun getHistory(listeHistory: MutableLiveData<Array<History>>) {
+        val url = "https://navmtl-543ba0ee6069.herokuapp.com/history"
+
+        val queue = Volley.newRequestQueue(app)
+        val request = StringRequest(
+            Request.Method.GET,
+            url,
+            {response ->
+                val gson = Gson()
+                val history = gson.fromJson(response, Array<History>::class.java)
+                listeHistory.postValue(history)
+            },
+            {error ->
+                Log.d("GetHistory","Erreur lors de la requête Volley : ${error.message}")
+            }
+        )
+        queue.add(request)
+    }
+
+    fun getFavoris(listeFavoris: MutableLiveData<Array<Favorite>>){
+        val url = "https://navmtl-543ba0ee6069.herokuapp.com/favori"
+
+        val queue = Volley.newRequestQueue(app)
+        val request = StringRequest(
+            Request.Method.GET,
+            url,
+            {response ->
+                val gson = Gson()
+                val favori = gson.fromJson(response,Array<Favorite>::class.java)
+                listeFavoris.postValue(favori)
+            },
+            { error ->
+                Log.d("GetFavoris","Erreur lors de la requête Volley : ${error.message}")
+            }
+        )
+        queue.add(request)
+    }
 }

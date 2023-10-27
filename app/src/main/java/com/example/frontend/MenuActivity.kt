@@ -25,6 +25,7 @@ class MenuActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_menu)
+        val repository = Repository(application)
 
         // Retrieve the token from SharedPreferences
         val sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
@@ -32,6 +33,16 @@ class MenuActivity: AppCompatActivity() {
         val backButton = findViewById<ImageButton>(R.id.back)
         val profileButton = findViewById<Button>(R.id.profilebutton)
         val favorisButton = findViewById<Button>(R.id.favorisbutton)
+        val connectionButton = findViewById<Button>(R.id.login)
+        val inscriptionButton = findViewById<Button>(R.id.signin)
+        val logoutButton = findViewById<Button>(R.id.logout)
+
+        logoutButton.setOnClickListener {
+            repository.logout()
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
 
         //bring page back to main page
         backButton.setOnClickListener {
@@ -54,7 +65,19 @@ class MenuActivity: AppCompatActivity() {
             finish()
         }
 
+        //bring page to connection page
+        connectionButton.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
 
+        //bring page to inscription page
+        inscriptionButton.setOnClickListener {
+            val intent = Intent(this, InscriptionActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
 
         getProfile()
     }

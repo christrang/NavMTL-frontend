@@ -71,7 +71,7 @@ class ProfileActivity : AppCompatActivity() {
                         // Update UI elements with the fetched data
                         val lastNameTextView = findViewById<TextView>(R.id.nom)
                         val emailTextView = findViewById<TextView>(R.id.email)
-                        val firstNameTextView = findViewById<TextView>(R.id.nom)
+                        val firstNameTextView = findViewById<TextView>(R.id.prenom)
                         val numberTextView = findViewById<TextView>(R.id.telephone)
                         val passwordTextView = findViewById<TextView>(R.id.mdp)
                         val titleNameTextView = findViewById<TextView>(R.id.name)

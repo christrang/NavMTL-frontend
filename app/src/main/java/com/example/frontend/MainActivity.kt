@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
@@ -107,6 +108,50 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         replaceFragment(mapFragment)
 
 
+        // Specify location bias for autocomplete
+        val montrealLatLngBounds = LatLngBounds(LatLng(45.4215, -73.5696), LatLng(45.6983, -73.4828))
+        autocompleteFragment.setLocationBias(RectangularBounds.newInstance(montrealLatLngBounds))
+
+        // Specify the types of place data to return (in this case, just addresses)
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG))
+        editTextAddress = findViewById(R.id.editTextAddress)
+
+        val historyViewModel = ViewModelProvider(this).get(HistoryViewModel::class.java)
+        historyViewModel.listeHistory.observe(this){
+            val rv = findViewById<RecyclerView>(R.id.rvHistory)
+            rv.layoutManager = LinearLayoutManager(this)
+            rv.adapter = HistoryRecycleView(it)
+        }
+
+        val favorisViewModel = ViewModelProvider(this).get(FavoriViewModel::class.java)
+        favorisViewModel.listeFavori.observe(this){
+            val rv = findViewById<RecyclerView>(R.id.favoriName)
+            rv.layoutManager = LinearLayoutManager(this)
+            rv.adapter = FavorisRecyclerView(it)
+        }
+
+        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onPlaceSelected(place: Place) {
+ //               handlePlaceSelection(place)
+                val montreal = LatLng(45.5017, -73.5673)
+                val selectedLatLng = place.latLng
+                val address = place.address
+                Log.e("place", place.toString())
+                if (selectedLatLng != null) {
+                    // Utilisez selectedLatLng pour obtenir les coordonnées (latitude et longitude)
+                    getDirections(montreal, selectedLatLng)
+                } else {
+                    // La position sélectionnée n'a pas de coordonnées valides
+                    Log.e("place", montreal.toString())
+                    Toast.makeText(applicationContext, "Coordonnées non disponibles", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onError(status: com.google.android.gms.common.api.Status) {
+                val errorMessage = status.statusMessage
+                Toast.makeText(applicationContext, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
+            }
+        })
         val menuButton = findViewById<ImageButton>(R.id.menu_button)
         menuButton.setOnClickListener {
             val intent = Intent(this, MenuActivity::class.java)
@@ -241,28 +286,30 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun handlePlaceSelection(place: Place) {
-        // Retrieve the selected place's address
-        val address = selectedAddress ?: ""
+//    private fun handlePlaceSelection(place: Place) {
+//        // Retrieve the selected place's address
+//        val address = selectedAddress ?: ""
+//
+//        // Add the selected address to the history list
+//        historyList.add(History(address, place.latLng.toString()))
+//
+//        // Notify the RecyclerView adapter that the data has changed
+//        rv.adapter?.notifyDataSetChanged()
+//
+//        // Set the selected address to the EditText
+//        editTextAddress.text = Editable.Factory.getInstance().newEditable(address)
+//
+//        val montreal = LatLng(45.5017, -73.5673)
+//        val selectedLatLng = place.latLng
+//        if (selectedLatLng != null) {
+//            getDirections(montreal, selectedLatLng)
+//        } else {
+//            Log.e("place", montreal.toString())
+//            Toast.makeText(applicationContext, "Coordonnées non disponibles", Toast.LENGTH_SHORT).show()
+//        }
+//    }
 
-        // Add the selected address to the history list
-        historyList.add(History(address, place.latLng.toString()))
 
-        // Notify the RecyclerView adapter that the data has changed
-        rv.adapter?.notifyDataSetChanged()
-
-        // Set the selected address to the EditText
-        editTextAddress.text = Editable.Factory.getInstance().newEditable(address)
-
-        val montreal = LatLng(45.5017, -73.5673)
-        val selectedLatLng = place.latLng
-        if (selectedLatLng != null) {
-            getDirections(montreal, selectedLatLng)
-        } else {
-            Log.e("place", montreal.toString())
-            Toast.makeText(applicationContext, "Coordonnées non disponibles", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     private val markers: MutableList<Marker> = mutableListOf()
     private var currentPolyline: Polyline? = null
