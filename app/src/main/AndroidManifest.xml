@@ -49,9 +49,14 @@
         <activity
             android:name=".CustomTripProgressActivity"
             android:exported="true" />
+        <activity android:name=".PlaceActivity"
+            android:exported="true"/>
 
              <activity android:name=".NavigationViewActivity"
                  android:exported="true">
+
+
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

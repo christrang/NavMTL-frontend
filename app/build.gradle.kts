@@ -51,6 +51,7 @@ android {
 dependencies {
     implementation("com.mapbox.navigation:android:2.10.1")
     implementation ("com.mapbox.navigation:ui-dropin:2.10.1")
+    implementation("com.mapbox.maps:android:10.16.1")
     implementation ("pub.devrel:easypermissions:3.0.0")
     implementation ("androidx.cardview:cardview:1.0.0")
     implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
