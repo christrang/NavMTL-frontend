@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import okhttp3.Address
 
-class HistoryRecycleView(private val historyList: List<History>) :
+class HistoryRecycleView(private val listeHistory: Array<History>) :
     RecyclerView.Adapter<HistoryRecycleView.ViewHolder>() {
     class ViewHolder(val view: View):RecyclerView.ViewHolder(view) {
         val addressTextView: TextView = view.findViewById(R.id.historyName)
@@ -20,12 +20,11 @@ class HistoryRecycleView(private val historyList: List<History>) :
     }
 
     override fun getItemCount(): Int {
-        return historyList.size
+        return listeHistory.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val historyItem = historyList[position]
-        holder.addressTextView.text = historyItem.address
+        holder.view.findViewById<TextView>(R.id.historyName).text = listeHistory[position].address
     }
 
 }
