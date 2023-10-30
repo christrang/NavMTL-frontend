@@ -33,6 +33,7 @@ class MenuActivity: AppCompatActivity() {
         val backButton = findViewById<ImageButton>(R.id.back)
         val profileButton = findViewById<Button>(R.id.profilebutton)
         val favorisButton = findViewById<Button>(R.id.favorisbutton)
+        val friendButton = findViewById<Button>(R.id.friendbutton)
         val connectionButton = findViewById<Button>(R.id.login)
         val inscriptionButton = findViewById<Button>(R.id.signin)
         val logoutButton = findViewById<Button>(R.id.logout)
@@ -75,6 +76,13 @@ class MenuActivity: AppCompatActivity() {
         //bring page to inscription page
         inscriptionButton.setOnClickListener {
             val intent = Intent(this, InscriptionActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
+        //bring page to friends page
+        friendButton.setOnClickListener {
+            val intent = Intent(this, FriendActivity::class.java)
             startActivity(intent)
             finish()
         }

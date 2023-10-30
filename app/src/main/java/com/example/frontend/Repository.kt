@@ -26,7 +26,7 @@ class Repository(val app: Application) {
     private lateinit var AUTH_TOKEN: String
 
     fun login(mail: String, mdp: String, callback: (Boolean) -> Unit) {
-        val url = "https://navmtl-543ba0ee6069.herokuapp.com/auth/token"  // Remplacez par votre adresse IP
+        val url = "https://navmtl-543ba0ee6069.herokuapp.com/auth/token"
 
         val json = JSONObject()
         json.put("email", mail)
