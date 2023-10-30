@@ -46,7 +46,7 @@ class MenuActivity: AppCompatActivity() {
 
         //bring page back to main page
         backButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, NavigationViewActivity::class.java)
             startActivity(intent)
             finish()
         }
@@ -60,7 +60,7 @@ class MenuActivity: AppCompatActivity() {
 
         // bring page to favorites page
         favorisButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, NavigationViewActivity::class.java)
             startActivity(intent)
             finish()
         }

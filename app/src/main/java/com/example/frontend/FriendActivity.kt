@@ -40,7 +40,7 @@ class FriendActivity : AppCompatActivity() {
         val friendListTextView = findViewById<TextView>(R.id.friendListTextView)
 
         backButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, NavigationViewActivity::class.java)
             startActivity(intent)
             finish()
         }
@@ -124,9 +124,6 @@ class FriendActivity : AppCompatActivity() {
                     searchResultTextView.text = "User not found"
                 }
             } else {
-                // Handle the error response
-                // Example: displayErrorMessage(response.message)
-
                 // Clear the search result TextView if there's an error
                 val searchResultTextView = findViewById<TextView>(R.id.searchResultTextView)
                 searchResultTextView.text = response.body.toString()
@@ -172,8 +169,6 @@ class FriendActivity : AppCompatActivity() {
                 val friendListTextView = findViewById<TextView>(R.id.friendListTextView)
                 friendListTextView.text = friendNames.joinToString("\n")
             } else {
-                // Handle the error response
-                // Example: displayErrorMessage(response.message)
             }
         }
     }

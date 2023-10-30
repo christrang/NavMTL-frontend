@@ -73,7 +73,7 @@ class InscriptionActivity : AppCompatActivity() {
                 if (response) {
                     Log.e("InscriptionActivity", "Inscription réussie")
                     // Gérez ici la suite de l'opération après une inscription réussie
-                    val intent = Intent(this, MainActivity::class.java)
+                    val intent = Intent(this, NavigationViewActivity::class.java)
                     startActivity(intent)
                     finish()
                 } else {

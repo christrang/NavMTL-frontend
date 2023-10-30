@@ -31,7 +31,7 @@ class ProfileActivity : AppCompatActivity() {
         val pagebackButton = findViewById<ImageButton>(R.id.fallback)
 
         backButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, NavigationViewActivity::class.java)
             startActivity(intent)
             finish()
         }
