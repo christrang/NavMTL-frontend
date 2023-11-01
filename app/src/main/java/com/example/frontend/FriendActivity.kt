@@ -40,7 +40,7 @@ class FriendActivity : AppCompatActivity() {
         val friendListTextView = findViewById<TextView>(R.id.friendListTextView)
 
         backButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, NavigationViewActivity::class.java)
             startActivity(intent)
             finish()
         }

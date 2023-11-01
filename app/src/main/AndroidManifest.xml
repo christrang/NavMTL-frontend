@@ -31,7 +31,7 @@
             android:resource="@array/preloaded_fonts" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".FavoriteActivity"
             android:exported="false" />
         <activity
             android:name=".MenuActivity"
