@@ -60,7 +60,7 @@ class MenuActivity: AppCompatActivity() {
 
         // bring page to favorites page
         favorisButton.setOnClickListener {
-            val intent = Intent(this, NavigationViewActivity::class.java)
+            val intent = Intent(this, FavoriteActivity::class.java)
             startActivity(intent)
             finish()
         }

@@ -9,6 +9,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/tripProgressCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:cardElevation="8dp"
+        app:cardUseCompatPadding="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
         <com.mapbox.maps.MapView
             android:id="@+id/mapView"
             android:layout_width="0dp"
@@ -129,6 +141,7 @@
         </androidx.cardview.widget.CardView>
 
 
+
         <com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
             android:id="@+id/maneuverView"
             android:layout_width="0dp"
@@ -208,7 +221,13 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvFavoris"
                 android:layout_width="411dp"
-                android:layout_height="127dp" />
+                android:layout_height="127dp"
+                android:orientation="horizontal"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvHistory"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
 
             <!-- Add more menu items or content as needed -->
