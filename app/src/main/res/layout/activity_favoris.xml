@@ -6,10 +6,25 @@
     android:layout_height="match_parent"
     android:background="@drawable/inscription_backgroud">
 
+    <ImageButton
+        android:id="@+id/reculer"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@null"
+        android:scaleType="fitCenter"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/textView3"
+        app:layout_constraintHorizontal_bias="0.958"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.022"
+        app:srcCompat="@drawable/close_svgrepo_com" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFavorite"
-        android:layout_width="match_parent"
-        android:layout_height="688dp"
+        android:layout_width="418dp"
+        android:layout_height="666dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -19,8 +34,8 @@
 
     <TextView
         android:id="@+id/textView3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="411dp"
+        android:layout_height="68dp"
         android:layout_marginBottom="29dp"
         android:text="Favoris"
         android:textAlignment="center"
@@ -33,15 +48,4 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
-    <ImageButton
-        android:id="@+id/reculer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/textView3"
-        app:layout_constraintHorizontal_bias="0.958"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.022"
-        app:srcCompat="@drawable/close_svgrepo_com" />
 </androidx.constraintlayout.widget.ConstraintLayout>

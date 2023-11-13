@@ -14,6 +14,7 @@ import okhttp3.OkHttpClient
 import org.json.JSONObject
 import android.os.Handler
 import android.os.Looper
+import com.android.volley.AuthFailureError
 import com.android.volley.toolbox.StringRequest
 import dagger.Reusable
 import kotlinx.coroutines.Dispatchers
@@ -154,37 +155,57 @@ class Repository(val app: Application) {
         val url = "https://navmtl-543ba0ee6069.herokuapp.com/history"
 
         val queue = Volley.newRequestQueue(app)
-        val request = StringRequest(
-            Request.Method.GET,
+        val request = object : StringRequest(
+            Method.GET,
             url,
-            {response ->
+            { response ->
                 val gson = Gson()
                 val history = gson.fromJson(response, Array<History>::class.java)
                 listeHistory.postValue(history)
             },
-            {error ->
-                Log.d("GetHistory","Erreur lors de la requête Volley : ${error.message}")
+            { error ->
+                Log.d("GetHistory", "Erreur lors de la requête Volley : ${error.message}")
             }
-        )
+        ) {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val headers = HashMap<String, String>()
+                // Add Bearer token to the Authorization header
+                headers["Authorization"] = "Bearer $AUTH_TOKEN"
+                return headers
+            }
+        }
+
         queue.add(request)
     }
 
-    fun getFavoris(listeFavoris: MutableLiveData<Array<Favorite>>){
+
+    fun getFavoris(listeFavoris: MutableLiveData<Array<Favorite>>) {
         val url = "https://navmtl-543ba0ee6069.herokuapp.com/favori"
 
         val queue = Volley.newRequestQueue(app)
-        val request = StringRequest(
+        val request = object : StringRequest(
             Request.Method.GET,
             url,
-            {response ->
+            { response ->
                 val gson = Gson()
-                val favori = gson.fromJson(response,Array<Favorite>::class.java)
+                val favori = gson.fromJson(response, Array<Favorite>::class.java)
                 listeFavoris.postValue(favori)
             },
             { error ->
-                Log.d("GetFavoris","Erreur lors de la requête Volley : ${error.message}")
+                Log.d("GetFavoris", "Erreur lors de la requête Volley : ${error.message}")
             }
-        )
+        ) {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val headers = HashMap<String, String>()
+                // Add Bearer token to the Authorization header
+                headers["Authorization"] = "Bearer $AUTH_TOKEN"
+                return headers
+            }
+        }
+
         queue.add(request)
     }
+
 }

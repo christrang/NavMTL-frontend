@@ -2,4 +2,6 @@
     <string name="app_name">Frontend</string>
     <string name="mapbox_access_token">pk.eyJ1IjoibWFydmVuc2NoZXJ5IiwiYSI6ImNsbmx1cGk2YjIwbmgybG5zbWFrNmhoNXEifQ.KqE9q3m5K64jtRdL_1AQlg</string>
     <string name="log_out">Log out</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
