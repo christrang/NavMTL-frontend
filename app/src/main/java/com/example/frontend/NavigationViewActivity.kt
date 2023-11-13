@@ -16,6 +16,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.os.Handler
 import android.support.annotation.DrawableRes
 import android.view.View
 import android.widget.ImageButton
@@ -27,6 +28,9 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -153,6 +157,7 @@ class NavigationViewActivity : AppCompatActivity() {
     private lateinit var menuButton: ImageButton
     private lateinit var autoCompleteFragment: AutocompleteSupportFragment
     private lateinit var location : String
+    private lateinit var test : Point
 
     /**
      * Debug tool used to play, pause and seek route progress events that can be used to produce mocked location updates along the route.
@@ -530,6 +535,20 @@ class NavigationViewActivity : AppCompatActivity() {
         setContentView(R.layout.activity_navigation_view)
 
 
+        val historyViewModel = ViewModelProvider(this).get(HistoryViewModel::class.java)
+        historyViewModel.listeHistory.observe(this){
+            val rv = findViewById<RecyclerView>(R.id.rvHistory)
+            rv.layoutManager = LinearLayoutManager(this)
+            rv.adapter = HistoryRecycleView(it)
+        }
+
+        val favorisViewModel = ViewModelProvider(this).get(FavoriViewModel::class.java)
+        favorisViewModel.listeFavori.observe(this){
+            val rv = findViewById<RecyclerView>(R.id.rvFavoris)
+            rv.layoutManager = LinearLayoutManager(this)
+            rv.adapter = FavorisRecyclerView(it)
+        }
+
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         binding = ActivityNavigationViewBinding.inflate(layoutInflater)
@@ -732,7 +751,7 @@ class NavigationViewActivity : AppCompatActivity() {
                 val address = it.getStringExtra("selectedAddress")
                 val latitude1 = it.getDoubleExtra("latitude", 0.0)
                 val longitude1 = it.getDoubleExtra("longitude", 0.0)
-                Log.e("Intent","got Here")
+
                 val bundle = intent?.extras
                 bundle?.let {
                     for (key in it.keySet()) {
@@ -740,9 +759,12 @@ class NavigationViewActivity : AppCompatActivity() {
                         Log.d("IntentExtras", "$key: $value")
                     }
                 }
-                val test = Point.fromLngLat(longitude1, latitude1)
+                 test = Point.fromLngLat(longitude1, latitude1)
+                Log.e("Intent", test.toString())
+                Handler().postDelayed({
+                    findRoute(test)
+                },1)
 
-                findRoute(test)
             }
             binding.mapView.gestures.addOnMapLongClickListener { point ->
                 findRoute(point)

@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
@@ -24,6 +25,13 @@ class InscriptionActivity : AppCompatActivity() {
         val number = findViewById<EditText>(R.id.inputPhone)
         val button2 = findViewById<Button>(R.id.button2)
         val errorMessageInscription = findViewById<TextView>(R.id.errorMessageInscription)
+        val back = findViewById<ImageButton>(R.id.inscriptionback)
+
+        back.setOnClickListener {
+            val intent = Intent(this, MenuActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
 
         button2.setOnClickListener{
             val intent = Intent(this, LoginActivity::class.java)
