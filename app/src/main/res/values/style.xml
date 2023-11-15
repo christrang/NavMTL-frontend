@@ -22,5 +22,8 @@
         <item name="cornerSizeTopLeft">10dp</item>
         <item name="cornerSizeTopRight">10dp</item>
     </style>
+    <style name="ProgressBar">
+        <item name="android:indeterminateTint">#7B3CEA</item>
+    </style>
 
 </resources>
