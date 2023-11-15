@@ -9,28 +9,17 @@ import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.Manifest
-import android.app.Activity
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.os.Handler
-import android.support.annotation.DrawableRes
 import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -67,27 +56,14 @@ import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.example.frontend.databinding.ActivityNavigationViewBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.model.RectangularBounds
-import com.google.android.libraries.places.widget.Autocomplete
-import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment.*
-import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.mapbox.maps.extension.style.layers.properties.generated.TextAnchor
-import com.mapbox.maps.plugin.annotation.annotations
-import com.mapbox.maps.plugin.annotation.generated.PointAnnotation
-import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
-import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
+import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
+import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
-import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
@@ -117,11 +93,53 @@ import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import java.text.SimpleDateFormat
-import java.util.Arrays
 import java.util.Date
 import java.util.Locale
-import kotlin.properties.Delegates
-
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.drawable.VectorDrawable
+import android.location.Geocoder
+import android.os.Looper
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.lifecycleScope
+import com.mapbox.geojson.Feature
+import com.example.frontend.RpaData
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.LineString
+import com.mapbox.maps.extension.style.expressions.dsl.generated.color
+import com.mapbox.maps.extension.style.expressions.dsl.generated.get
+import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
+import com.mapbox.maps.extension.style.expressions.dsl.generated.match
+import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.eq
+import com.mapbox.navigation.ui.maps.building.view.MapboxBuildingView
+import com.mapbox.maps.extension.style.layers.addLayer
+import com.mapbox.maps.extension.style.layers.generated.lineLayer
+import com.mapbox.maps.extension.style.layers.generated.symbolLayer
+import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
+import com.mapbox.maps.extension.style.sources.addSource
+import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
+import com.mapbox.maps.extension.style.sources.getSourceAs
+import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotation
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
+import com.mapbox.maps.plugin.gestures.OnMapClickListener
+import com.mapbox.navigation.base.route.RouteAlternativesOptions
+import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
+import com.mapbox.navigation.ui.maps.building.api.MapboxBuildingsApi
+import kotlinx.coroutines.launch
+import java.io.IOException
+import java.util.concurrent.TimeUnit
+import com.mapbox.maps.logE
+import com.mapbox.navigation.ui.maps.building.model.BuildingValue
+import com.mapbox.navigation.ui.maps.building.model.BuildingError
 /**
  * This example demonstrates a basic turn-by-turn navigation experience by putting together some UI elements to showcase
  * navigation camera transitions, guidance instructions banners and playback, and progress along the route.
@@ -157,9 +175,38 @@ class NavigationViewActivity : AppCompatActivity() {
     private lateinit var menuButton: ImageButton
     private lateinit var autoCompleteFragment: AutocompleteSupportFragment
     private lateinit var location : String
-    private lateinit var test : Point
-
+    private lateinit var pointLayer: SymbolLayer
+    private lateinit var pointSource: GeoJsonSource
+    private lateinit var currentPoint: Point
+    private lateinit var destin: Point
+    private val routeClickPadding = 30 * Resources.getSystem().displayMetrics.density
+    private var currentDestinationAnnotation: PointAnnotation? = null
+    private lateinit var pointAnnotationManager: PointAnnotationManager
+    private var percentDistanceTraveledThreshold: Double = 95.0
+    private var distanceRemainingThresholdInMeters = 30
+    private var arrivalNotificationHasDisplayed = false
+    private val buildingView = MapboxBuildingView()
     /**
+     * The callback contains a list of buildings returned as a result of querying the [MapboxMap].
+     * If no buildings are available, the list is empty
+     */
+    private val callback =
+        MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>> { expected ->
+            expected.fold(
+                {
+                    logE(
+                        "ShowBuildingExtrusionsActivity",
+                        "error: ${it.errorMessage}"
+                    )
+                },
+                { value ->
+                    binding.mapView.getMapboxMap().getStyle { style ->
+                        buildingView.highlightBuilding(style, value.buildings)
+                    }
+                }
+            )
+        }
+            /**
      * Debug tool used to play, pause and seek route progress events that can be used to produce mocked location updates along the route.
      */
     private val mapboxReplayer = MapboxReplayer()
@@ -206,6 +253,27 @@ class NavigationViewActivity : AppCompatActivity() {
      */
     private val speedLimitApi: MapboxSpeedLimitApi by lazy {
         MapboxSpeedLimitApi(speedLimitFormatter)
+    }
+
+    /**
+     * The SDK triggers [NavigationRouteAlternativesObserver] when available alternatives change.
+     */
+    private val alternativesObserver = object : NavigationRouteAlternativesObserver {
+        override fun onRouteAlternatives(
+            routeProgress: RouteProgress,
+            alternatives: List<NavigationRoute>,
+            routerOrigin: RouterOrigin
+        ) {
+            // Set the suggested alternatives
+            val updatedRoutes = mutableListOf<NavigationRoute>()
+            updatedRoutes.add(routeProgress.navigationRoute) // only primary route should persist
+            updatedRoutes.addAll(alternatives) // all old alternatives should be replaced by the new ones
+            mapboxNavigation.setNavigationRoutes(updatedRoutes)
+        }
+
+        override fun onRouteAlternativesError(error: RouteAlternativesError) {
+            // no impl
+        }
     }
 
 
@@ -411,7 +479,41 @@ class NavigationViewActivity : AppCompatActivity() {
         }
     }
 
+
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+
+        val totalDistance = routeProgress.distanceTraveled + routeProgress.distanceRemaining
+        val percentDistanceTraveled = (routeProgress.distanceTraveled / totalDistance) * 100
+        if (
+            percentDistanceTraveled >= percentDistanceTraveledThreshold &&
+            routeProgress.distanceRemaining <= distanceRemainingThresholdInMeters &&
+            !arrivalNotificationHasDisplayed
+        ) {
+            arrivalNotificationHasDisplayed = true
+            val arrivalCardView = findViewById<CardView>(R.id.arrivalCardView)
+            val buttonYes = findViewById<ImageButton>(R.id.buttonYes)
+            val buttonNo = findViewById<ImageButton>(R.id.buttonNo)
+
+            // Imaginons que cette fonction est appelée lorsque l'utilisateur arrive à destination
+
+                arrivalCardView.visibility = View.VISIBLE
+
+                // Configurer les gestionnaires de clics pour les boutons
+                buttonYes.setOnClickListener {
+                    // Gérer le clic sur 'Oui'
+                    // Par exemple, enregistrer l'état du stationnement
+                    Toast.makeText(this, "Oui!", Toast.LENGTH_LONG).show()
+                    arrivalCardView.visibility = View.GONE
+                }
+
+                buttonNo.setOnClickListener {
+                    // Gérer le clic sur 'Non'
+                    // Par exemple, proposer d'autres options de stationnement
+                    Toast.makeText(this, "Non!", Toast.LENGTH_LONG).show()
+                    arrivalCardView.visibility = View.GONE
+                }
+        }
+
         // update the camera position to account for the progressed fragment of the route
         val tripProgress = tripProgressApi.getTripProgress(routeProgress)
         val totalTimeRemainingFormatted = formatTime(tripProgress.totalTimeRemaining.toLong())
@@ -474,7 +576,10 @@ class NavigationViewActivity : AppCompatActivity() {
         if (routeUpdateResult.navigationRoutes.isNotEmpty()) {
             // generate route geometries asynchronously and render them
             routeLineApi.setNavigationRoutes(
-                routeUpdateResult.navigationRoutes
+                routeUpdateResult.navigationRoutes,
+                alternativeRoutesMetadata = mapboxNavigation.getAlternativeMetadataFor(
+                    routeUpdateResult.navigationRoutes
+                )
             ) { value ->
                 binding.mapView.getMapboxMap().getStyle()?.apply {
                     routeLineView.renderRouteDrawData(this, value)
@@ -503,6 +608,30 @@ class NavigationViewActivity : AppCompatActivity() {
         }
     }
 
+    private val mapClickListener = OnMapClickListener { point ->
+        lifecycleScope.launch {
+            routeLineApi.findClosestRoute(
+                point,
+                binding.mapView.getMapboxMap(),
+                routeClickPadding
+            ) {
+                val routeFound = it.value?.navigationRoute
+                // if we clicked on some route that is not primary,
+                // we make this route primary and all the others - alternative
+                if (routeFound != null && routeFound != routeLineApi.getPrimaryNavigationRoute()) {
+                    val reOrderedRoutes = routeLineApi.getNavigationRoutes()
+                        .filter { navigationRoute -> navigationRoute != routeFound }
+                        .toMutableList()
+                        .also { list ->
+                            list.add(0, routeFound)
+                        }
+                        previewRoutes(reOrderedRoutes)
+                }
+            }
+        }
+        false
+    }
+
     private val mapboxNavigation: MapboxNavigation by requireMapboxNavigation(
         onResumedObserver = object : MapboxNavigationObserver {
             @SuppressLint("MissingPermission")
@@ -512,6 +641,7 @@ class NavigationViewActivity : AppCompatActivity() {
                 mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
                 mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
                 mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
+                mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
                 // start the trip session to being receiving location updates in free drive
                 // and later when a route is set also receiving route progress updates
                 mapboxNavigation.startTripSession()
@@ -523,9 +653,10 @@ class NavigationViewActivity : AppCompatActivity() {
                 mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
                 mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
                 mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
+                mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
             }
         },
-        onInitialize = this::initNavigation
+        onInitialize = this::initNavigation,
     )
 
     @SuppressLint("MissingPermission")
@@ -535,109 +666,15 @@ class NavigationViewActivity : AppCompatActivity() {
         setContentView(R.layout.activity_navigation_view)
 
 
-        val historyViewModel = ViewModelProvider(this).get(HistoryViewModel::class.java)
-        historyViewModel.listeHistory.observe(this){
-            val rv = findViewById<RecyclerView>(R.id.rvHistory)
-            rv.layoutManager = LinearLayoutManager(this)
-            rv.adapter = HistoryRecycleView(it)
-        }
-
-        val favorisViewModel = ViewModelProvider(this).get(FavoriViewModel::class.java)
-        favorisViewModel.listeFavori.observe(this){
-            val rv = findViewById<RecyclerView>(R.id.rvFavoris)
-            rv.layoutManager = LinearLayoutManager(this)
-            rv.adapter = FavorisRecyclerView(it)
-        }
-
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         binding = ActivityNavigationViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        pointAnnotationManager = binding.mapView.annotations.createPointAnnotationManager()
+        binding.mapView.gestures.addOnMapClickListener(mapClickListener)
         // Récupérez la liste des panneaux depuis votre API
         val repository = Repository(application)
-        val annotationToDescriptionMap: MutableMap<PointAnnotation, String> = mutableMapOf()
-        fun convertDrawableToBitmap(sourceDrawable: Drawable?): Bitmap? {
-            if (sourceDrawable == null) {
-                return null
-            }
-            if (sourceDrawable is BitmapDrawable) {
-                val bitmapConfig = sourceDrawable.bitmap.config
-                if (bitmapConfig == Bitmap.Config.ARGB_8888) {
-                    return sourceDrawable.bitmap
-                }
-            }
 
-            // Regardless of the original config of sourceDrawable, we ensure the resulting bitmap has ARGB_8888 config
-            val bitmap: Bitmap = Bitmap.createBitmap(
-                sourceDrawable.intrinsicWidth, sourceDrawable.intrinsicHeight,
-                Bitmap.Config.ARGB_8888
-            )
-            val canvas = Canvas(bitmap)
-            sourceDrawable.setBounds(0, 0, canvas.width, canvas.height)
-            sourceDrawable.draw(canvas)
-
-            // Création d'une version réduite de la bitmap
-            val scaledBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.width / 2, bitmap.height / 2, true)
-
-            return scaledBitmap
-        }
-
-         fun bitmapFromDrawableRes(context: Context, @DrawableRes resourceId: Int) =
-            convertDrawableToBitmap(AppCompatResources.getDrawable(context, resourceId))
-
-
-
-        fun addAnnotationToMap(rpaData: RpaData) {
-            val isPanneauDifferent = rpaData.Resultat_Verification == "true"
-            val drawableResId = if (isPanneauDifferent) R.drawable.parking__2_ else R.drawable.parking__1_
-
-            bitmapFromDrawableRes(
-                this@NavigationViewActivity,
-                drawableResId
-            )?.let {
-                val annotationApi = binding.mapView.annotations
-                val pointAnnotationManager = annotationApi?.createPointAnnotationManager(binding.mapView!!)
-                val pointAnnotationOptions: PointAnnotationOptions = PointAnnotationOptions()
-                    .withPoint(Point.fromLngLat(rpaData.Coordonnees.Longitude, rpaData.Coordonnees.Latitude))
-                    .withIconImage(it)
-                    .withTextField(rpaData.Description_RPA)
-                    .withTextSize(12.0)
-                    .withTextAnchor(TextAnchor.TOP)
-                    .withTextColor("#FFFFFF")
-                    .withTextLineHeight(3.0)
-                    .withTextMaxWidth(300.0)
-                    .withTextHaloBlur(1.0)     // Halo légèrement flou
-                    .withTextHaloColor("#000000")
-                    .withTextHaloWidth(0.5)
-
-                val createdAnnotation = pointAnnotationManager?.create(pointAnnotationOptions)
-                createdAnnotation?.let { annotation ->
-                    annotationToDescriptionMap[annotation] = rpaData.Description_RPA
-                }
-            }
-        }
-
-        fun setupAnnotationClickListener() {
-            val pointAnnotationManager = binding.mapView.annotations.createPointAnnotationManager()
-            pointAnnotationManager?.addClickListener { clickedAnnotation ->
-                val description = annotationToDescriptionMap[clickedAnnotation]
-                description?.let {
-                    Log.e("markerpannea",it)
-                    Toast.makeText(this@NavigationViewActivity, it, Toast.LENGTH_SHORT).show()
-                }
-                true
-            }
-        }
-
-        val listePanneau = MutableLiveData<List<RpaData>>()
-        repository.main(listePanneau)
-// Lorsque vous observez `listePanneau`:
-        listePanneau.observe(this@NavigationViewActivity) { panneauxList ->
-            setupAnnotationClickListener()
-            panneauxList.forEach { rpaData ->
-                addAnnotationToMap(rpaData)
-            }
-        }
 
 
 
@@ -745,38 +782,88 @@ class NavigationViewActivity : AppCompatActivity() {
         routeArrowView = MapboxRouteArrowView(routeArrowOptions)
 
         // load map style
-        binding.mapView.getMapboxMap().loadStyleUri("mapbox://styles/marvenschery/clnzg3ia300aa01qs6spv0mt7") {
-            // add long click listener that search for a route to the clicked destination
+        binding.mapView.getMapboxMap().loadStyleUri("mapbox://styles/marvenschery/clnzg3ia300aa01qs6spv0mt7") { style ->
+
+            // Ajouter vos images
+           style.addImage(
+                "mon_icone",
+                BitmapFactory.decodeResource(resources, R.drawable.parking__3_)
+           )
+
+           // Ajouter une source GeoJson
+            val source = geoJsonSource("source_id") {
+                featureCollection(FeatureCollection.fromFeatures(emptyList()))
+            }
+           style.addSource(source)
+
+            // Ajouter un layer
+            val layer = symbolLayer("layer_id", "source_id") {
+                iconImage("mon_icone")
+                iconAllowOverlap(true)
+                iconAnchor(IconAnchor.BOTTOM)
+            }
+            style.addLayer(layer)
+
+
+
+            // Ajouter un layer pour la ligne
+
+
+
+            // Ajouter un écouteur de clic long sur la carte
+            binding.mapView.gestures.addOnMapLongClickListener { point ->
+                val bottomSheetLayout: LinearLayout = findViewById(R.id.bottom_sheet)
+                val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                val latitude = point.latitude()
+                val longitude = point.longitude()
+
+                infoPanel(latitude, longitude)
+
+                true
+            }
+
+            // Gérer les données provenant de l'intent
             intent?.let {
                 val address = it.getStringExtra("selectedAddress")
                 val latitude1 = it.getDoubleExtra("latitude", 0.0)
                 val longitude1 = it.getDoubleExtra("longitude", 0.0)
 
-                val bundle = intent?.extras
-                bundle?.let {
-                    for (key in it.keySet()) {
-                        val value = it.get(key)
-                        Log.d("IntentExtras", "$key: $value")
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if(latitude1 !=  0.0) {
+                        infoPanel(latitude1, longitude1)
                     }
-                }
-                 test = Point.fromLngLat(longitude1, latitude1)
-                Log.e("Intent", test.toString())
-                Handler().postDelayed({
-                    findRoute(test)
-                },1)
 
+                }, 1)
             }
-            binding.mapView.gestures.addOnMapLongClickListener { point ->
-                findRoute(point)
-                true
-            }
+            val loadingLayout = findViewById<CardView>(R.id.loadingCardView)
+
+            // Afficher le ProgressBar
+            loadingLayout.visibility = View.VISIBLE
+
+            val listePanneau = MutableLiveData<List<RpaData>>()
+            Log.d("dvfv","decd")
+            replayOriginLocation()
+            repository.main(listePanneau, currentPoint.coordinates()[1], currentPoint.coordinates()[0])
+
+            listePanneau.observe(this, Observer { panneauxList ->
+                Log.d("panneau", panneauxList.toString())
+                updateLinesOnMap(panneauxList,5.0)
+                updatePointsOnMap(panneauxList)
+
+                // Masquer le ProgressBar après le chargement des données
+                loadingLayout.visibility = View.GONE
+            })
         }
+
 
         // initialize view interactions
         binding.stop.setOnClickListener {
             clearRouteAndStopNavigation()
-            val bottomSheetLinearLayout: LinearLayout = findViewById(R.id.bottom_sheet)
-            val bottomSheetBehavior: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior.from(bottomSheetLinearLayout)
+            binding.infoPanel.visibility = View.INVISIBLE
+            val bottomSheetLayout: LinearLayout = findViewById(R.id.bottom_sheet)
+            val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
+            bottomSheetBehavior.peekHeight = 400
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
         binding.recenter.setOnClickListener {
@@ -796,7 +883,7 @@ class NavigationViewActivity : AppCompatActivity() {
         binding.soundButton.unmute()
         val bottomSheetLayout: LinearLayout = findViewById(R.id.bottom_sheet)
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
-        //bottomSheetBehavior.peekHeight = 500
+        bottomSheetBehavior.peekHeight = 450
         bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
@@ -827,6 +914,151 @@ class NavigationViewActivity : AppCompatActivity() {
 
 
     }
+    private fun createLineForPanneau(panneau: RpaData, lineLength: Double): Feature {
+        // Exemple simple où on prend la direction vers le nord pour la démonstration
+        val startLatitude = panneau.Coordonnees.Latitude
+        val startLongitude = panneau.Coordonnees.Longitude
+
+        // Calcul simple pour une ligne vers le nord, à ajuster en fonction de la direction réelle
+        val endLatitude = startLatitude + (lineLength / 111974) // approximativement 1 degré de latitude = 111 km
+
+        val startPoint = Point.fromLngLat(startLongitude, startLatitude)
+        val endPoint = Point.fromLngLat(startLongitude, endLatitude)
+
+        return Feature.fromGeometry(LineString.fromLngLats(listOf(startPoint, endPoint)))
+    }
+
+    private fun updateLinesOnMap(panneauxList: List<RpaData>, lineLength: Double) {
+        val features = panneauxList.map { panneau ->
+            createLineForPanneau(panneau, lineLength)
+        }
+        val featureCollection = FeatureCollection.fromFeatures(features)
+
+        val truePanneauxList = panneauxList.filter { it.Resultat_Verification == "true" }
+        val falsePanneauxList = panneauxList.filter { it.Resultat_Verification != "true" }
+
+// Generating features
+        val trueFeatures = truePanneauxList.map { createLineForPanneau(it, lineLength) }
+        val falseFeatures = falsePanneauxList.map { createLineForPanneau(it, lineLength) }
+
+        binding.mapView.getMapboxMap().getStyle { style ->
+            // Identifiers for the "true" features
+            val trueSourceId = "true-line-source"
+            val trueLayerId = "true-line-layer"
+
+            // First remove the layer that uses the source
+            if (style.styleLayerExists(trueLayerId)) {
+                style.removeStyleLayer(trueLayerId)
+            }
+
+            // Then remove the source
+            if (style.styleSourceExists(trueSourceId)) {
+                style.removeStyleSource(trueSourceId)
+            }
+
+            // Now it's safe to add the source back
+            val trueSource = geoJsonSource(trueSourceId) {
+                featureCollection(FeatureCollection.fromFeatures(trueFeatures))
+            }
+            style.addSource(trueSource)
+
+            // Re-add the layer
+            val trueLineLayer = lineLayer(trueLayerId, trueSourceId) {
+                lineColor("red")
+                lineWidth(10.0)
+            }
+            style.addLayer(trueLineLayer)
+
+            // Repeat the process for the "false" features
+            val falseSourceId = "false-line-source"
+            val falseLayerId = "false-line-layer"
+
+            // Remove the layer
+            if (style.styleLayerExists(falseLayerId)) {
+                style.removeStyleLayer(falseLayerId)
+            }
+
+            // Remove the source
+            if (style.styleSourceExists(falseSourceId)) {
+                style.removeStyleSource(falseSourceId)
+            }
+
+            // Add the source back
+            val falseSource = geoJsonSource(falseSourceId) {
+                featureCollection(FeatureCollection.fromFeatures(falseFeatures))
+            }
+            style.addSource(falseSource)
+
+            // Re-add the layer
+            val falseLineLayer = lineLayer(falseLayerId, falseSourceId) {
+                lineColor("blue")
+                lineWidth(10.0)
+            }
+            style.addLayer(falseLineLayer)
+        }
+    }
+    private fun getBitmapFromVectorDrawable(context: Context, drawableId: Int): Bitmap? {
+        val drawable = ContextCompat.getDrawable(context, drawableId) as VectorDrawable?
+        val bitmap = Bitmap.createBitmap(drawable!!.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
+    }
+    private fun updatePointsOnMap(panneauxList: List<RpaData>) {
+        // Séparer les données en deux listes selon 'Resultat_Verification'
+        val trueFeatures = panneauxList.filter { it.Resultat_Verification == "true" }
+            .map { rpaData ->
+                Feature.fromGeometry(Point.fromLngLat(rpaData.Coordonnees.Longitude, rpaData.Coordonnees.Latitude)).apply {
+                    addStringProperty("icon", "true_icon") // Ajouter une propriété personnalisée pour identifier l'image à utiliser
+                }
+            }
+        val falseFeatures = panneauxList.filter { it.Resultat_Verification == "false" }
+            .map { rpaData ->
+                Feature.fromGeometry(Point.fromLngLat(rpaData.Coordonnees.Longitude, rpaData.Coordonnees.Latitude)).apply {
+                    addStringProperty("icon", "false_icon") // Ajouter une propriété personnalisée pour identifier l'image à utiliser
+                }
+            }
+
+        val featureCollection = FeatureCollection.fromFeatures(trueFeatures + falseFeatures)
+
+        binding.mapView.getMapboxMap().loadStyleUri("mapbox://styles/marvenschery/clnzg3ia300aa01qs6spv0mt7") { style ->
+            val trueIconBitmap = getBitmapFromVectorDrawable(this, R.drawable.parking_true)
+            val falseIconBitmap = getBitmapFromVectorDrawable(this, R.drawable.parking_false)
+
+            if (trueIconBitmap != null) {
+                style.addImage("true_icon", trueIconBitmap)
+            }
+            if (falseIconBitmap != null) {
+                style.addImage("false_icon", falseIconBitmap)
+            }
+
+            // Ajouter une source GeoJson
+            val source = geoJsonSource("source_id") {
+                featureCollection(featureCollection)
+            }
+            style.addSource(source)
+
+            // Ajouter un layer pour 'true'
+            val trueLayer = symbolLayer("true_layer_id", "source_id") {
+                iconImage("{icon}")
+                iconAllowOverlap(true)
+                iconAnchor(IconAnchor.BOTTOM)
+                filter(eq(get("icon"), literal("true_icon")))
+            }
+            style.addLayer(trueLayer)
+
+            // Ajouter un layer pour 'false'
+            val falseLayer = symbolLayer("false_layer_id", "source_id") {
+                iconImage("{icon}")
+                iconAllowOverlap(true)
+                iconAnchor(IconAnchor.BOTTOM)
+                filter(eq(get("icon"), literal("false_icon")))
+            }
+            style.addLayer(falseLayer)
+        }
+    }
+
 
 
     override fun onDestroy() {
@@ -850,6 +1082,11 @@ class NavigationViewActivity : AppCompatActivity() {
                 .accessToken(getString(R.string.mapbox_access_token))
                 // comment out the location engine setting block to disable simulation
                 .locationEngine(replayLocationEngine)
+                .routeAlternativesOptions(
+                    RouteAlternativesOptions.Builder()
+                        .intervalMillis(TimeUnit.MINUTES.toMillis(3))
+                        .build()
+                )
                 .build()
         )
 
@@ -865,6 +1102,7 @@ class NavigationViewActivity : AppCompatActivity() {
             enabled = true
         }
         Log.e("location", "ici")
+        navigationCamera.requestNavigationCameraToFollowing()
         replayOriginLocation()
     }
 
@@ -872,11 +1110,13 @@ class NavigationViewActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED) {
 
-            Log.e("location", "ici")
+
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                 location?.let {
+                    Log.e("Helo", "Yes Permis")
+                     currentPoint = Point.fromLngLat(it.longitude, it.latitude)
+                    destin = currentPoint
 
-                    val currentPoint = Point.fromLngLat(it.longitude, it.latitude)
 
                     mapboxReplayer.pushEvents(
                         listOf(
@@ -894,18 +1134,36 @@ class NavigationViewActivity : AppCompatActivity() {
 
             REQUEST_CODE_LOCATION
             Manifest.permission.ACCESS_FINE_LOCATION
-            Log.e("location", "no permission")
+            Log.e("permission", "no permission")
         }
     }
 
     private fun findRoute(destination: Point) {
-
+        val bottomSheetLinearLayout: LinearLayout = findViewById(R.id.bottom_sheet)
+        val bottomSheetBehavior: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior.from(bottomSheetLinearLayout)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
         val originLocation = navigationLocationProvider.lastLocation
         val originPoint = originLocation?.let {
             Point.fromLngLat(it.longitude, it.latitude)
         } ?: return
             Log.e("destination", destination.toString())
+            destin = destination
+        val loadingLayout = findViewById<CardView>(R.id.loadingCardView)
+        loadingLayout.visibility = View.VISIBLE
+        val repository = Repository(application)
+        Log.d("destin", destin.toString())
+        val listePanneau = MutableLiveData<List<RpaData>>()
+        repository.main(listePanneau, destin.coordinates()[1], destin.coordinates()[0])
+
+
+        listePanneau.observe(this, Observer { panneauxList ->
+            Log.d("panneau", panneauxList.toString())
+            updateLinesOnMap(panneauxList,5.0)
+            updatePointsOnMap(panneauxList)
+
+            loadingLayout.visibility = View.GONE
+        })
         // execute a route request
         // it's recommended to use the
         // applyDefaultNavigationOptions and applyLanguageAndVoiceUnitOptions
@@ -916,6 +1174,7 @@ class NavigationViewActivity : AppCompatActivity() {
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
                 .coordinatesList(listOf(originPoint, destination))
+                .alternatives(true)
                 // provide the bearing for the origin of the request to ensure
                 // that the returned route faces in the direction of the current user movement
                 .bearingsList(
@@ -935,20 +1194,66 @@ class NavigationViewActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
-                    // no impl
+
                 }
 
                 override fun onRoutesReady(
                     routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    setRouteAndStartNavigation(routes)
+                    previewRoutes(routes)
+
+                    addDestinationMarker(destination)
                 }
             }
         )
     }
+    private fun addDestinationMarker(destination: Point) {
+        val context = this
+
+        binding.mapView.getMapboxMap().getStyle { style ->
+            // Supprimer l'ancien marqueur
+            currentDestinationAnnotation?.let { pointAnnotationManager.delete(it) }
+
+            // Convertir l'image vectorielle en Bitmap
+            val destinationIconBitmap = getBitmapFromVectorDrawable(context, R.drawable.marker)
+            if (destinationIconBitmap != null) {
+                style.addImage("destination_icon", destinationIconBitmap)
+            }
+
+            // Créer une PointAnnotationOptions pour le nouveau marqueur
+            val pointAnnotationOptions = PointAnnotationOptions()
+                .withPoint(destination)
+                .withIconImage("destination_icon")
+
+            // Ajouter l'annotation et mettre à jour la référence
+            currentDestinationAnnotation = pointAnnotationManager.create(pointAnnotationOptions)
+        }
+    }
+    private fun previewRoutes(routes: List<NavigationRoute>) {
+        // Mapbox navigation doesn't have a special state for route preview.
+        // Preview state is managed by an application.
+        // Display the routes you received on the map.
+        routeLineApi.setNavigationRoutes(routes) { value ->
+            binding.mapView.getMapboxMap().getStyle().apply {
+                this?.let { routeLineView.renderRouteDrawData(it, value) }
+                // update the camera position to account for the new route
+                viewportDataSource.onRouteChanged(routes.first())
+                viewportDataSource.evaluate()
+                navigationCamera.requestNavigationCameraToOverview()
+            }
+        }
+        binding.buttonOverview.setOnClickListener {
+            navigationCamera.requestNavigationCameraToOverview()
+        }
+        binding.buttonGo.setOnClickListener {
+            binding.infoPanel.visibility = View.INVISIBLE
+            setRouteAndStartNavigation(routes)
+        }
+    }
 
     private fun setRouteAndStartNavigation(routes: List<NavigationRoute>) {
+        binding.routeOverview.showTextAndExtend(BUTTON_ANIMATION_DURATION)
         // set routes, where the first route in the list is the primary route that
         // will be used for active guidance
         val bottomSheetLinearLayout: LinearLayout = findViewById(R.id.bottom_sheet)
@@ -962,6 +1267,53 @@ class NavigationViewActivity : AppCompatActivity() {
         binding.tripProgressCard.visibility = View.VISIBLE
         // move the camera to overview when new route is available
         navigationCamera.requestNavigationCameraToOverview()
+    }
+    private fun infoPanel(lat: Double, long: Double) {
+       /* binding.mapView.gestures.addOnMapClickListener { point ->
+            val bottomSheetLayout: LinearLayout = findViewById(R.id.bottom_sheet)
+            val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            val latitude = point.latitude()
+            val longitude = point.longitude()
+
+            binding.infoPanel.visibility = View.INVISIBLE
+
+            false
+        }*/
+        binding.infoPanel.visibility = View.VISIBLE
+        binding.tripProgressCard.visibility = View.INVISIBLE
+        // Initialisation du BottomSheetBehavior
+        val bottomSheetLinearLayout: LinearLayout = findViewById(R.id.bottom_sheet)
+        val bottomSheetBehavior: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior.from(bottomSheetLinearLayout)
+        bottomSheetBehavior.peekHeight = 0
+
+        // Mise à jour des coordonnées dans l'interface utilisateur
+        val addressTextView: TextView = findViewById(R.id.addressText)
+        addressTextView.text = "Lat: $lat, Long: $long"
+
+        // Utilisation de l'API Geocoding pour convertir les coordonnées en adresse
+        val geocoder = Geocoder(this, Locale.getDefault())
+        try {
+            val addresses = geocoder.getFromLocation(lat, long, 1)
+            if (addresses != null) {
+                if (addresses.isNotEmpty()) {
+                    val address = addresses?.get(0)
+                    // Affichez l'adresse complète ou formatez-la comme vous le souhaitez
+                    if (address != null) {
+                        addressTextView.text = address.getAddressLine(0)
+                    }
+                } else {
+                    addressTextView.text = "Adresse non trouvée"
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            addressTextView.text = "Erreur lors de la recherche de l'adresse"
+        }
+
+        // Utilisation du point pour trouver un itinéraire
+        val point = Point.fromLngLat(long, lat)
+        findRoute(point)
     }
 
     private fun clearRouteAndStopNavigation() {

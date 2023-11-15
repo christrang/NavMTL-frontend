@@ -11,6 +11,8 @@ import com.android.volley.toolbox.Volley
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.OkHttpClient
+import okhttp3.Request as OkHttpRequest
+
 import org.json.JSONObject
 import android.os.Handler
 import android.os.Looper
@@ -19,6 +21,7 @@ import com.android.volley.toolbox.StringRequest
 import dagger.Reusable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
 
 class Repository(val app: Application) {
     private val queue = Volley.newRequestQueue(app)
@@ -113,14 +116,17 @@ class Repository(val app: Application) {
     }
 
     // Obtenir les panneaux
-    fun main(listePanneau: MutableLiveData<List<RpaData>>) {
-        val client = OkHttpClient()
-
-        // L'URL de la route Flask
-        val url = "https://navmtl-543ba0ee6069.herokuapp.com/panneau/run"
+    fun main(listePanneau: MutableLiveData<List<RpaData>>, latitude: Double, longitude: Double) {
+        // Formatez l'URL avec les coordonnées de l'utilisateur
+        val url = "https://navmtl-543ba0ee6069.herokuapp.com/panneau/run?lat=$latitude&long=$longitude"
 
         // Créez une requête GET
-        val request = okhttp3.Request.Builder()
+        val client = OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.MINUTES)
+            .readTimeout(30, TimeUnit.MINUTES)
+            .build()
+
+        val request = OkHttpRequest.Builder()
             .url(url)
             .get()
             .build()
@@ -150,6 +156,7 @@ class Repository(val app: Application) {
             }
         }.start()
     }
+
 
     fun getHistory(listeHistory: MutableLiveData<Array<History>>) {
         val url = "https://navmtl-543ba0ee6069.herokuapp.com/history"
