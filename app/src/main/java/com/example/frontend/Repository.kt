@@ -18,10 +18,10 @@ import android.os.Handler
 import android.os.Looper
 import com.android.volley.AuthFailureError
 import com.android.volley.toolbox.StringRequest
-import dagger.Reusable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class Repository(val app: Application) {
     private val queue = Volley.newRequestQueue(app)
@@ -187,32 +187,37 @@ class Repository(val app: Application) {
     }
 
 
-    fun getFavoris(listeFavoris: MutableLiveData<Array<Favorite>>) {
-        val url = "https://navmtl-543ba0ee6069.herokuapp.com/favori"
+    suspend fun getFavoris(): Array<Favorite> {
+        val url = "https://navmtl-543ba0ee6069.herokuapp.com/favoris"
 
         val queue = Volley.newRequestQueue(app)
-        val request = object : StringRequest(
-            Request.Method.GET,
-            url,
-            { response ->
-                val gson = Gson()
-                val favori = gson.fromJson(response, Array<Favorite>::class.java)
-                listeFavoris.postValue(favori)
-            },
-            { error ->
-                Log.d("GetFavoris", "Erreur lors de la requête Volley : ${error.message}")
-            }
-        ) {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                // Add Bearer token to the Authorization header
-                headers["Authorization"] = "Bearer $AUTH_TOKEN"
-                return headers
-            }
-        }
 
-        queue.add(request)
+        return suspendCancellableCoroutine { continuation ->
+            val request = object : StringRequest(
+                Method.GET,
+                url,
+                { response ->
+                    val gson = Gson()
+                    val favori = gson.fromJson(response, Array<Favorite>::class.java)
+                    continuation.resume(favori)
+                },
+                { error ->
+                    Log.d("GetFavoris", "Erreur lors de la requête Volley : ${error.message}")
+                    continuation.resumeWithException(error)
+                }
+            ) {
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): Map<String, String> {
+                    val headers = HashMap<String, String>()
+                    // Add Bearer token to the Authorization header
+                    headers["Authorization"] = "Bearer $AUTH_TOKEN"
+                    return headers
+                }
+            }
+
+            queue.add(request)
+        }
     }
+
 
 }

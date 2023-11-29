@@ -6,16 +6,15 @@
     android:layout_height="match_parent"
     tools:ignore="MissingDefaultResource">
 
-    <TextView
+    <Button
         android:id="@+id/historyName"
-        android:layout_width="300dp"
-        android:layout_height="30dp"
-        android:text="TextView"
-        android:textSize="20sp"
+        android:layout_width="367dp"
+        android:layout_height="58dp"
+        android:text="Button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.137"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.092" />
+        app:layout_constraintVertical_bias="0.09" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class FavorisRecyclerView(val listeFavoris: Array<Favorite>):
+class FavorisRecyclerView(var listeFavoris: Array<Favorite>):
     RecyclerView.Adapter<FavorisRecyclerView.RecyclerViewViewHolder>() {
     class RecyclerViewViewHolder(val view: View): RecyclerView.ViewHolder(view)
 
@@ -22,6 +22,11 @@ class FavorisRecyclerView(val listeFavoris: Array<Favorite>):
 
     override fun onBindViewHolder(holder: RecyclerViewViewHolder, position: Int) {
         holder.view.findViewById<TextView>(R.id.favoriName).text = listeFavoris[position].address
+    }
+
+    fun updateData(newList: Array<Favorite>) {
+        listeFavoris = newList
+        notifyDataSetChanged()
     }
 
 }

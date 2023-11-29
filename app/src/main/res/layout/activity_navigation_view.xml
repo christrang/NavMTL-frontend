@@ -109,6 +109,17 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
+                <ImageButton
+                    android:id="@+id/AddFavorite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:src="@drawable/favorite_svgrepo_com"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.407"
+                    app:layout_constraintStart_toEndOf="@+id/buttonOverview"
+                    app:layout_constraintTop_toTopOf="parent" />
+
                 <androidx.constraintlayout.widget.Guideline
                     android:id="@+id/guideline"
                     android:layout_width="wrap_content"
@@ -120,8 +131,10 @@
                     android:id="@+id/buttonOverview"
                     android:layout_width="87dp"
                     android:layout_height="71dp"
+                    android:layout_marginTop="4dp"
                     app:cornerRadius="5dp"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.201"
                     app:layout_constraintStart_toEndOf="@+id/guideline"
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/overview_svgrepo_com" />

@@ -3,6 +3,7 @@ package com.example.frontend
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import okhttp3.Address
@@ -22,7 +23,7 @@ class HistoryRecycleView(private val listeHistory: Array<History>) :
     }
 
     override fun onBindViewHolder(holder: RecyclerViewViewHolder, position: Int) {
-        holder.view.findViewById<TextView>(R.id.historyName).text = listeHistory[position].address
+        holder.view.findViewById<Button>(R.id.historyName).text = listeHistory[position].address
     }
 
 }
