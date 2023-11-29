@@ -235,6 +235,7 @@ class FriendActivity : AppCompatActivity() {
                     .build()
 
                 val response = client.newCall(request).execute()
+                Log.d("q",response.toString())
                 handleFriendRequestsResponse(response)
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -246,27 +247,34 @@ class FriendActivity : AppCompatActivity() {
         withContext(Dispatchers.Main) {
             if (response.isSuccessful) {
                 val responseData = response.body?.string()
-                Log.d("d", responseData.toString())
+                Log.d("q", responseData.toString())
                 if (responseData != null) {
                     try {
                         val friendRequests = parseFriendRequests(responseData)
-
-                        // Get a reference to your RecyclerView
+                        Log.d("q", friendRequests.toString())
                         val friendRequestsRecyclerView = findViewById<RecyclerView>(R.id.pendingRequestsRecyclerView)
 
-                        // Create an instance of the custom RecyclerView adapter
-                        val adapter = FriendRequestAdapter(friendRequests)
+                        friendRequestsRecyclerView.layoutManager = LinearLayoutManager(this@FriendActivity)
 
-                        // Set the adapter for the RecyclerView
+                        val adapter = FriendRequestAdapter(friendRequests)
+                        adapter.onAcceptButtonClickListener = object : FriendRequestAdapter.OnAcceptButtonClickListener {
+                            override fun onAcceptButtonClick(friendRequest: FriendRequest) {
+                                acceptFriendRequest(friendRequest.demandeID)
+                            }
+                        }
+
+                        adapter.onDeclineButtonClickListener = object : FriendRequestAdapter.OnDeclineButtonClickListener {
+                            override fun onDeclineButtonClick(friendRequest: FriendRequest) {
+                                declineFriendRequest(friendRequest.demandeID)
+                            }
+                        }
+
                         friendRequestsRecyclerView.adapter = adapter
 
-                        // Optionally, you can set a layout manager for the RecyclerView (e.g., LinearLayoutManager).
-                        // friendRequestsRecyclerView.layoutManager = LinearLayoutManager(this)
-
-                        // Optionally, handle the case where the list is empty
                         if (friendRequests.isEmpty()) {
                             // Display a message or handle as needed
                         }
+
                     } catch (e: JSONException) {
                         // Handle JSON parsing error
                         e.printStackTrace()
@@ -281,7 +289,52 @@ class FriendActivity : AppCompatActivity() {
         }
     }
 
+    private fun acceptFriendRequest(demandeID: Int) {
+        Log.d("qqqqq", demandeID.toString())
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .url("$baseUrl/accepter-demande-ami/$demandeID")
+                    .header("Authorization", "Bearer $AUTH_TOKEN")
+                    .post(RequestBody.create(null, ByteArray(0))) // You can adjust the body based on the API requirements
+                    .build()
 
+                val response = client.newCall(request).execute()
+                handleAcceptFriendResponse(response)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun declineFriendRequest(demandeID: Int) {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .url("$baseUrl/decliner-demande-ami/$demandeID")
+                    .header("Authorization", "Bearer $AUTH_TOKEN")
+                    .post(RequestBody.create(null, ByteArray(0))) // You can adjust the body based on the API requirements
+                    .build()
+
+                val response = client.newCall(request).execute()
+                handleDeclineFriendResponse(response)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun handleAcceptFriendResponse(response: Response) {
+        // Handle the response for accepting a friend request
+        // Example: displaySuccessMessageOrError(response)
+    }
+
+    private fun handleDeclineFriendResponse(response: Response) {
+        // Handle the response for declining a friend request
+        // Example: displaySuccessMessageOrError(response)
+    }
     private fun parseFriendRequests(responseData: String): List<FriendRequest> {
         val friendRequests = mutableListOf<FriendRequest>()
         val jsonArray = JSONArray(responseData)
@@ -292,9 +345,13 @@ class FriendActivity : AppCompatActivity() {
             // Parse the friend request data and create a FriendRequest object
             val nom = jsonObject.getString("nom")
             val prenom = jsonObject.getString("prenom")
+            val userID = jsonObject.getInt("userID")
+            val expediteurID = jsonObject.getInt("expediteurID")
+            val demandeID = jsonObject.getInt("demandeID")
+            val destinataireID = jsonObject.getInt("destinataireID")
 
             // Create a FriendRequest object and add it to the list
-            val friendRequest = FriendRequest(nom, prenom)
+            val friendRequest = FriendRequest(nom, prenom, userID, expediteurID, demandeID, destinataireID)
             friendRequests.add(friendRequest)
         }
 
@@ -344,7 +401,6 @@ class FriendActivity : AppCompatActivity() {
                     .build()
 
                 val response = client.newCall(request).execute()
-
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
                         val responseData = response.body?.string()
