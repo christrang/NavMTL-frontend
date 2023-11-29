@@ -12,8 +12,8 @@
 
 
     <style name="MapboxCustomManeuverTurnIconStyle" parent="MapboxStyleTurnIconManeuver">
-        <item name="maneuverTurnIconColor">#7B3CEA</item>
-        <item name="maneuverTurnIconShadowColor">#A378EF</item>
+        <item name="maneuverTurnIconColor">#5C00FF</item>
+        <item name="maneuverTurnIconShadowColor">#5E18DA</item>
     </style>
 
     <style name="MapboxCustomManeuverStyle" parent="MapboxStyleManeuverView">

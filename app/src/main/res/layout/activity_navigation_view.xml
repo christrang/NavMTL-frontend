@@ -142,19 +142,101 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
+
         <androidx.cardview.widget.CardView
+            android:id="@+id/arrivalParkingCardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="@color/white"
+            android:visibility="gone"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+            <ProgressBar
+                android:id="@+id/countdownProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="100"/>
+                <!--android:progressDrawable="@drawable/custom_progress_bar"-->
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="24dp">
+
+            <TextView
+                android:id="@+id/arrivalMessage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Vous êtes arrivé à votre destination"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/parkingTimeLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/baloo"
+                android:text="Vous pouvez stationner jusqu'à:"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/arrivalMessage" />
+
+            <TextView
+                android:id="@+id/parkingTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="18:00"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="#7B3CEA"
+                android:textSize="48sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/parkingTimeLabel" />
+            <TextView
+                android:id="@+id/notificationMessage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/baloo"
+                android:text="On vous avertira quand l'heure arrive à sa fin ;)"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/parkingTime" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+
+    <androidx.cardview.widget.CardView
             android:id="@+id/arrivalCardView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
             android:background="@color/white"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/tripProgressCard"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintStart_toStartOf="parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
@@ -166,7 +248,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/baloo"
-                    android:text="Vous êtes arrivé, êtes-vous stationné ?"
+                    android:text="Vous êtes arrivé ? êtes-vous stationné ?"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -214,6 +296,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="8dp">
+
+                <ImageButton
+                    android:id="@+id/station"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/station"
+                    android:visibility="visible"
+                    app:layout_constraintEnd_toStartOf="@id/stop"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginEnd="4dp"/>
 
                 <Button
                     android:id="@+id/stop"
@@ -355,18 +449,31 @@
                 android:clickable="false"
                 android:text="Button" />
 
-            <Button
-                android:id="@+id/placeAutocompleteButton"
-                android:layout_width="349dp"
-                android:layout_height="wrap_content"
-                android:backgroundTint="#676767"
-                android:fontFamily="@font/baloo"
-                android:hint="Où va-t-on?"
-                android:textColor="#000000"
-                android:textSize="20sp"
-                app:icon="@drawable/loupe"
-                app:iconSize="28dp"
-                app:iconTint="#515151" />
+        <TextView
+            android:id="@+id/nom1"
+            android:layout_width="282dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/baloo"
+            android:text="nom!"
+            android:textAlignment="center"
+            android:textColor="#F8F8F8"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/placeAutocompleteButton"
+            android:layout_width="349dp"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#676767"
+            android:fontFamily="@font/baloo"
+            android:hint="Où va-t-on?"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            app:icon="@drawable/loupe"
+            app:iconSize="28dp"
+            app:iconTint="#515151" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvFavoris"
