@@ -11,8 +11,23 @@ class FavoriViewModel(val app: Application):AndroidViewModel(app) {
     var listeFavori = MutableLiveData<Array<Favorite>>()
 
     init {
+        getFavorites()
+    }
+
+    private fun getFavorites() {
         viewModelScope.launch (Dispatchers.IO){
-            Repository(getApplication()).getFavoris(listeFavori)
+            val favorites = Repository(getApplication()).getFavoris()
+            listeFavori.postValue(favorites)
         }
+    }
+
+    fun addToFavorites(address: String) {
+        val currentFavorites = listeFavori.value?.toMutableList() ?: mutableListOf()
+
+        // Add the new address to the list
+        currentFavorites.add(Favorite(address))
+
+        // Update the LiveData with the new list
+        listeFavori.postValue(currentFavorites.toTypedArray())
     }
 }

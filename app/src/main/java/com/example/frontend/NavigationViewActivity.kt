@@ -97,23 +97,21 @@ import java.util.Date
 import java.util.Locale
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.drawable.VectorDrawable
 import android.location.Geocoder
 import android.os.Looper
-import android.widget.ProgressBar
+import android.widget.Button
 import android.widget.TextView
 import androidx.cardview.widget.CardView
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.mapbox.geojson.Feature
-import com.example.frontend.RpaData
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
-import com.mapbox.maps.extension.style.expressions.dsl.generated.color
 import com.mapbox.maps.extension.style.expressions.dsl.generated.get
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
-import com.mapbox.maps.extension.style.expressions.dsl.generated.match
 import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.eq
 import com.mapbox.navigation.ui.maps.building.view.MapboxBuildingView
 import com.mapbox.maps.extension.style.layers.addLayer
@@ -122,7 +120,6 @@ import com.mapbox.maps.extension.style.layers.generated.symbolLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
-import com.mapbox.maps.extension.style.sources.getSourceAs
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotation
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
@@ -133,13 +130,13 @@ import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
-import com.mapbox.navigation.ui.maps.building.api.MapboxBuildingsApi
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import com.mapbox.maps.logE
 import com.mapbox.navigation.ui.maps.building.model.BuildingValue
 import com.mapbox.navigation.ui.maps.building.model.BuildingError
+
 /**
  * This example demonstrates a basic turn-by-turn navigation experience by putting together some UI elements to showcase
  * navigation camera transitions, guidance instructions banners and playback, and progress along the route.
@@ -675,6 +672,21 @@ class NavigationViewActivity : AppCompatActivity() {
         // Récupérez la liste des panneaux depuis votre API
         val repository = Repository(application)
 
+        val historyViewModel = ViewModelProvider(this).get(HistoryViewModel::class.java)
+        historyViewModel.listeHistory.observe(this){
+            val rv = findViewById<RecyclerView>(R.id.rvHistory)
+            rv.layoutManager = LinearLayoutManager(this)
+            rv.adapter = HistoryRecycleView(it)
+        }
+
+        val favorisViewModel = ViewModelProvider(this).get(FavoriViewModel::class.java)
+        favorisViewModel.listeFavori.observe(this){
+            val rv = findViewById<RecyclerView>(R.id.rvFavoris)
+            rv.layoutManager = LinearLayoutManager(this)
+            rv.adapter = FavorisRecyclerView(it)
+        }
+
+        val addToFav = findViewById<ImageButton>(R.id.AddFavorite)
 
 
 
@@ -806,10 +818,6 @@ class NavigationViewActivity : AppCompatActivity() {
 
 
 
-            // Ajouter un layer pour la ligne
-
-
-
             // Ajouter un écouteur de clic long sur la carte
             binding.mapView.gestures.addOnMapLongClickListener { point ->
                 val bottomSheetLayout: LinearLayout = findViewById(R.id.bottom_sheet)
@@ -913,6 +921,30 @@ class NavigationViewActivity : AppCompatActivity() {
         })
 
 
+    }
+    fun addToSearchHistory(address: String, latitude: String, longitude: String) {
+        val addToHistoryTask = AddToHistoryTask(this)
+        addToHistoryTask.execute(address, latitude, longitude)
+    }
+
+    private fun addFavorite() {
+        val buttonAddFavoris = findViewById<ImageButton>(R.id.AddFavorite)
+        val addressText = findViewById<TextView>(R.id.addressText)
+
+        buttonAddFavoris.setOnClickListener {
+            val address = addressText.text.toString()
+
+            // Check if the address is not empty before adding it to the favorites
+            if (address.isNotEmpty()) {
+                // Call the function to add the address to the favorites
+                addToFavorites(address)
+            }
+        }
+    }
+
+    private fun addToFavorites(address: String) {
+        val favoriViewModel = ViewModelProvider(this).get(FavoriViewModel::class.java)
+        favoriViewModel.addToFavorites(address)
     }
     private fun createLineForPanneau(panneau: RpaData, lineLength: Double): Feature {
         // Exemple simple où on prend la direction vers le nord pour la démonstration
