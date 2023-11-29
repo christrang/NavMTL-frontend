@@ -140,6 +140,14 @@ import java.util.concurrent.TimeUnit
 import com.mapbox.maps.logE
 import com.mapbox.navigation.ui.maps.building.model.BuildingValue
 import com.mapbox.navigation.ui.maps.building.model.BuildingError
+import android.animation.ValueAnimator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
+
 /**
  * This example demonstrates a basic turn-by-turn navigation experience by putting together some UI elements to showcase
  * navigation camera transitions, guidance instructions banners and playback, and progress along the route.
@@ -186,6 +194,9 @@ class NavigationViewActivity : AppCompatActivity() {
     private var distanceRemainingThresholdInMeters = 30
     private var arrivalNotificationHasDisplayed = false
     private val buildingView = MapboxBuildingView()
+    private lateinit var AUTH_TOKEN: String
+    private val url = "http://navmtl-543ba0ee6069.herokuapp.com/user"
+    private lateinit var locStationement: Point
     /**
      * The callback contains a list of buildings returned as a result of querying the [MapboxMap].
      * If no buildings are available, the list is empty
@@ -490,30 +501,53 @@ class NavigationViewActivity : AppCompatActivity() {
             !arrivalNotificationHasDisplayed
         ) {
             arrivalNotificationHasDisplayed = true
-            val arrivalCardView = findViewById<CardView>(R.id.arrivalCardView)
-            val buttonYes = findViewById<ImageButton>(R.id.buttonYes)
-            val buttonNo = findViewById<ImageButton>(R.id.buttonNo)
 
-            // Imaginons que cette fonction est appelée lorsque l'utilisateur arrive à destination
+        }
+        val arrivalCardView = findViewById<CardView>(R.id.arrivalCardView)
+        val buttonYes = findViewById<ImageButton>(R.id.buttonYes)
+        val buttonNo = findViewById<ImageButton>(R.id.buttonNo)
+        val station = findViewById<ImageButton>(R.id.station)
+        val arrive = findViewById<CardView>(R.id.arrivalParkingCardView)
+        // Imaginons que cette fonction est appelée lorsque l'utilisateur arrive à destination
+        station.setOnClickListener {
+        arrivalCardView.visibility = View.VISIBLE
 
-                arrivalCardView.visibility = View.VISIBLE
+        // Configurer les gestionnaires de clics pour les boutons
+        buttonYes.setOnClickListener {
+            // Gérer le clic sur 'Oui'
+            // Par exemple, enregistrer l'état du stationnement
+            Toast.makeText(this, "Oui!", Toast.LENGTH_LONG).show()
+            arrivalCardView.visibility = View.GONE
+           locStationement = currentPoint
+            val repository = Repository(application)
+            Log.d("destin", locStationement.toString())
+            val listePanneau = MutableLiveData<List<RpaData>>()
+            repository.main(listePanneau, locStationement.coordinates()[1], locStationement.coordinates()[0])
 
-                // Configurer les gestionnaires de clics pour les boutons
-                buttonYes.setOnClickListener {
-                    // Gérer le clic sur 'Oui'
-                    // Par exemple, enregistrer l'état du stationnement
-                    Toast.makeText(this, "Oui!", Toast.LENGTH_LONG).show()
-                    arrivalCardView.visibility = View.GONE
-                }
+            arrive.visibility = View.VISIBLE
+            Handler(Looper.getMainLooper()).postDelayed({
+                // This code will be executed after 5 seconds
+                clearRouteAndStopNavigation()
+                arrive.visibility = View.GONE // Hide the card view
+            }, 5000)
+            val progressBar = findViewById<ProgressBar>(R.id.countdownProgressBar)
+            val animation = ValueAnimator.ofInt(100, 0)
+            animation.duration = 15000 // Duration of 5 seconds
+            animation.addUpdateListener { animation ->
+                progressBar.progress = animation.animatedValue as Int
+            }
+            animation.start()
 
-                buttonNo.setOnClickListener {
-                    // Gérer le clic sur 'Non'
-                    // Par exemple, proposer d'autres options de stationnement
-                    Toast.makeText(this, "Non!", Toast.LENGTH_LONG).show()
-                    arrivalCardView.visibility = View.GONE
-                }
+
         }
 
+        buttonNo.setOnClickListener {
+            // Gérer le clic sur 'Non'
+            // Par exemple, proposer d'autres options de stationnement
+            Toast.makeText(this, "Non!", Toast.LENGTH_LONG).show()
+            arrivalCardView.visibility = View.GONE
+        }
+        }
         // update the camera position to account for the progressed fragment of the route
         val tripProgress = tripProgressApi.getTripProgress(routeProgress)
         val totalTimeRemainingFormatted = formatTime(tripProgress.totalTimeRemaining.toLong())
@@ -529,7 +563,6 @@ class NavigationViewActivity : AppCompatActivity() {
         val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
         val formattedTime = dateFormat.format(estimatedArrivalTime)
         binding.tempsEstime.text = formattedTime
-
 
         binding.tripProgressView.render(tripProgress)
         viewportDataSource.onRouteProgressChanged(routeProgress)
@@ -675,10 +708,13 @@ class NavigationViewActivity : AppCompatActivity() {
         // Récupérez la liste des panneaux depuis votre API
         val repository = Repository(application)
 
+        val sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        AUTH_TOKEN = sharedPrefs.getString("token", null) ?: ""
+        Log.d("token",AUTH_TOKEN)
 
-
-
-
+        if (AUTH_TOKEN != ""){
+            getProfile()
+        }
 
         binding.placeAutocompleteButton.setOnClickListener {
             val intent = Intent(this, PlaceActivity::class.java).apply {
@@ -844,7 +880,22 @@ class NavigationViewActivity : AppCompatActivity() {
             val listePanneau = MutableLiveData<List<RpaData>>()
             Log.d("dvfv","decd")
             replayOriginLocation()
-            repository.main(listePanneau, currentPoint.coordinates()[1], currentPoint.coordinates()[0])
+
+            // Assuming currentPoint is a nullable type (e.g., Location?)
+            if (currentPoint != null) {
+                Log.d("on","a")
+                // Check if currentPoint has valid coordinates
+                val latitude = currentPoint.coordinates()[1]
+                val longitude = currentPoint.coordinates()[0]
+
+                if (latitude != null && longitude != null) {
+                    repository.main(listePanneau, latitude, longitude)
+                } else {
+                    Log.d("on","a pas cordi")
+                }
+            } else {
+                Log.d("on","a pas")
+            }
 
             listePanneau.observe(this, Observer { panneauxList ->
                 Log.d("panneau", panneauxList.toString())
@@ -860,6 +911,7 @@ class NavigationViewActivity : AppCompatActivity() {
         // initialize view interactions
         binding.stop.setOnClickListener {
             clearRouteAndStopNavigation()
+            binding.arrivalCardView.visibility = View.INVISIBLE
             binding.infoPanel.visibility = View.INVISIBLE
             val bottomSheetLayout: LinearLayout = findViewById(R.id.bottom_sheet)
             val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
@@ -1317,6 +1369,10 @@ class NavigationViewActivity : AppCompatActivity() {
     }
 
     private fun clearRouteAndStopNavigation() {
+        val bottomSheetLayout: LinearLayout = findViewById(R.id.bottom_sheet)
+        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
+        bottomSheetBehavior.peekHeight = 400
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         // clear
         mapboxNavigation.setNavigationRoutes(listOf())
 
@@ -1328,5 +1384,39 @@ class NavigationViewActivity : AppCompatActivity() {
         binding.maneuverView.visibility = View.INVISIBLE
         binding.routeOverview.visibility = View.INVISIBLE
         binding.tripProgressCard.visibility = View.INVISIBLE
+    }
+    private fun getProfile() {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val client = OkHttpClient()
+
+                val request = Request.Builder()
+                    .url(url)
+                    .header("Authorization", "Bearer $AUTH_TOKEN")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val responseData = response.body?.string()
+
+                withContext(Dispatchers.Main) {
+                    if (responseData != null) {
+                        // Parse the JSON response and update UI elements
+                        // Replace with the actual parsing logic
+                        val jsonObject = JSONObject(responseData)
+                        val nom = jsonObject.optString("prenom")
+
+                        // Update UI elements with the fetched data
+                        val lastNameTextView = findViewById<TextView>(R.id.nom1)
+                        lastNameTextView.visibility = View.VISIBLE
+                        val bonjour = ("Salut, $nom")
+
+                        lastNameTextView.text = bonjour
+
+                    }
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
     }
 }
